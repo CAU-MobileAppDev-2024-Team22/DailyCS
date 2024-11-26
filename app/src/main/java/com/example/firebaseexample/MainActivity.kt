@@ -8,9 +8,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.firebaseexample.ui.LoginPage
-import com.example.firebaseexample.ui.MainPage
-import com.example.firebaseexample.ui.RegisterPage
+import com.example.firebaseexample.ui.pages.LoginPage
+import com.example.firebaseexample.ui.pages.MainPage
+import com.example.firebaseexample.ui.pages.RegisterPage
 import com.example.firebaseexample.ui.theme.FirebaseExampleTheme
 import com.example.firebaseexample.viewmodel.AuthViewModel
 import com.google.firebase.FirebaseApp
