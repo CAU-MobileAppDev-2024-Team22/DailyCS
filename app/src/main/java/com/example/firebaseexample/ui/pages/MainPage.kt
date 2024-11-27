@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
@@ -24,12 +25,16 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.components.QuizCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainPage(onLogout: () -> Unit) {
+fun MainPage(
+    onLogout: () -> Unit,
+    goToQuizListPage: ()->Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -89,7 +94,7 @@ fun MainPage(onLogout: () -> Unit) {
             ButtonCard(
                 title = "유형별 문제 풀기",
                 backgroundColor = Color(0xFF9084FF),
-                onClick = { /* 버튼 클릭 이벤트 */ }
+                onClick = { goToQuizListPage() }
             )
         }
     }
@@ -103,33 +108,12 @@ fun ButtonCard(
 ) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp), // 버튼 높이를 80dp로 설정
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(12.dp) // 모서리 둥글기를 8dp로 설정
     ) {
         Text(text = title, style = MaterialTheme.typography.titleMedium, color = Color.White)
-    }
-}
-
-@Composable
-fun BottomNavigationBar() {
-    NavigationBar {
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            label = { Text("Home") },
-            selected = false,
-            onClick = { /* Home 클릭 이벤트 */ }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Analytics, contentDescription = "Analytics") },
-            label = { Text("Analytics") },
-            selected = false,
-            onClick = { /* Analytics 클릭 이벤트 */ }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-            label = { Text("Profile") },
-            selected = false,
-            onClick = { /* Profile 클릭 이벤트 */ }
-        )
     }
 }

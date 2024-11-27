@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.firebaseexample.ui.pages.LoginPage
 import com.example.firebaseexample.ui.pages.MainPage
+import com.example.firebaseexample.ui.pages.QuizListPage
 import com.example.firebaseexample.ui.pages.RegisterPage
 import com.example.firebaseexample.ui.theme.FirebaseExampleTheme
 import com.example.firebaseexample.viewmodel.AuthViewModel
@@ -48,6 +49,11 @@ class MainActivity : ComponentActivity() {
                             backToLoginPage = { navController.navigateUp() }
                         )
                     }
+                    composable(route = "quizList") {
+                        QuizListPage(
+                            goToMainPage = {navController.navigateUp()}
+                        )
+                    }
                     composable(route = "main") {
                         MainPage(
                             onLogout = {
@@ -55,7 +61,8 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("login") {
                                     popUpTo("main") { inclusive = true }
                                 }
-                            }
+                            },
+                            goToQuizListPage = {navController.navigate(route = "quizList")}
                         )
                     }
                 }
