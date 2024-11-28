@@ -35,7 +35,6 @@ fun MainPage(
     onLogout: () -> Unit,
     goToQuizListPage: ()->Unit
 ) {
-    println("@@@@@@@@@@@")
     Scaffold(
         topBar = {
             TopAppBar(
