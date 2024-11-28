@@ -1,6 +1,7 @@
 package com.example.firebaseexample
 
 import QuizListPage
+import QuizPage
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
