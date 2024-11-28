@@ -33,14 +33,27 @@ import com.example.firebaseexample.ui.components.QuizCard
 @Composable
 fun MainPage(
     onLogout: () -> Unit,
-    goToQuizListPage: ()->Unit
+    goToQuizListPage: () -> Unit
 ) {
-    println("@@@@@@@@@@@")
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = "푸앙", style = MaterialTheme.typography.titleLarge) },
                 actions = {
+                    // 로그아웃 버튼
+                    Button(
+                        onClick = onLogout,
+                        modifier = Modifier.padding(end = 8.dp), // 버튼 오른쪽 여백
+                        shape = RoundedCornerShape(8.dp) // 모서리 둥글게
+                    ) {
+                        Text(
+                            text = "로그아웃",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    // 프로필 아이콘
                     IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
                         Icon(
                             imageVector = Icons.Default.Person,
@@ -100,6 +113,7 @@ fun MainPage(
         }
     }
 }
+
 
 @Composable
 fun ButtonCard(
