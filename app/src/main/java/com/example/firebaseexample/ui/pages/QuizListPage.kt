@@ -1,80 +1,76 @@
 package com.example.firebaseexample.ui.pages
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.firebaseexample.data.model.QuizCategory
+import com.example.firebaseexample.viewmodel.QuizListViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizListPage(
-    goToMainPage: ()->Unit
+    onCategoryClick: (String) -> Unit
 ) {
-    // Raw 데이터를 가져옴
-    val categories = getQuizCategories()
+    val viewModel: QuizListViewModel = viewModel()
+    val quizCategories by viewModel.quizCategories.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("유형별 문제 풀기", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = { goToMainPage() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로가기")
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp) // 화면 여백
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp) // 항목 간 간격
+    // 디버깅 로그
+    println("Fetched quiz categories: $quizCategories")
+
+    if (quizCategories.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            // 데이터를 순회하여 카드 컴포넌트 생성
-            categories.forEach { category ->
-                item {
-                    QuizCategoryCard(
-                        title = category.title,
-                        score = category.score,
-                        prob_num = category.prob_num,
-                    )
+            Text(text = "퀴즈 데이터를 불러올 수 없습니다.")
+        }
+    } else {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp, start = 16.dp, end = 16.dp), // 상단 고정 여백
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                quizCategories.forEach { (categoryId, category) ->
+                    item {
+                        QuizCategoryCard(
+                            title = category.title,
+                            score = category.problems.size,
+                            prob_num = category.problems.size,
+                            onClick = { onCategoryClick(categoryId) }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-// Raw 데이터를 제공하는 함수
-fun getQuizCategories(): List<QuizCategory> {
-    return listOf(
-        QuizCategory("알고리즘", 0, 35),
-        QuizCategory("컴퓨터구조", 0, 35),
-        QuizCategory("자료구조", 0, 35),
-        QuizCategory("운영체제", 0, 35),
-        QuizCategory("네트워크", 0, 35),
-        QuizCategory("쿠버네티스", 0, 35)
-    )
-}
-
-// 데이터 클래스
-data class QuizCategory(val title: String, val score: Int, val prob_num: Int)
-
 @Composable
-fun QuizCategoryCard(title: String, score: Int, prob_num: Int) {
+fun QuizCategoryCard(
+    title: String,
+    score: Int,
+    prob_num: Int,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp), // 카드 높이
+            .height(100.dp)
+            .clickable { onClick() }, // 클릭 이벤트 처리
         colors = CardDefaults.cardColors(containerColor = Color(0xFF6F5ACD)), // 카드 배경색
         shape = MaterialTheme.shapes.medium // 모서리 둥글게
     ) {
@@ -85,20 +81,30 @@ fun QuizCategoryCard(title: String, score: Int, prob_num: Int) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // 카테고리 이름
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.White
-            )
+            // 왼쪽: 카테고리 제목
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
+            }
 
-            // 점수
-            Text(
-                text = "${score} / ${prob_num}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White,
-                textAlign = TextAlign.End
-            )
+            // 오른쪽: 점수 및 총 문제 수
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "${score} / ${prob_num}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White,
+                    textAlign = TextAlign.End
+                )
+            }
         }
     }
 }
