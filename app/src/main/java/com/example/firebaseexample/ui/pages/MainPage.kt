@@ -25,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.ui.Alignment
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.components.QuizCard
 
@@ -112,8 +113,20 @@ fun ButtonCard(
             .fillMaxWidth()
             .height(80.dp), // 버튼 높이를 80dp로 설정
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(12.dp) // 모서리 둥글기를 8dp로 설정
+        shape = RoundedCornerShape(12.dp) // 모서리 둥글기를 12dp로 설정
     ) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium, color = Color.White)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 0.dp), // 텍스트와 버튼 경계 사이의 여백
+            verticalAlignment = Alignment.CenterVertically // 수직 가운데 정렬
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                modifier = Modifier.align(Alignment.CenterVertically) // 수직 가운데 정렬
+            )
+        }
     }
 }
