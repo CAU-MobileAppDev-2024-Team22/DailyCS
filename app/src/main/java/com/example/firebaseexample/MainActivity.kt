@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = if (isLoggedIn) "main" else "else",
+                    startDestination = if (isLoggedIn) "main" else "login",
                 ) {
                     // 로그인 페이지
                     composable(route = "login") {
