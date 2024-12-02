@@ -75,7 +75,7 @@ class QuizRepository {
         // quizId를 카테고리 문서의 하위 필드로 저장
         categoryRef.update(mapOf(quizId to quizResult))
             .addOnSuccessListener {
-                println("Quiz result saved successfully under category $categoryName with ID: $quizId")
+                println("맞춤 여부 $isCorrect, 카테고리: $categoryName, ID: $quizId")
             }
             .addOnFailureListener { exception ->
                 // 문서가 없는 경우 새로 생성

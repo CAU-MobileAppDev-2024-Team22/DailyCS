@@ -1,4 +1,3 @@
-import android.icu.util.ULocale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun QuizPage(
     categoryId: String,
-    onFinishQuiz: () -> Unit // 퀴즈가 끝났을 때 호출할 콜백
+    onFinishQuiz: (Any?, Any?) -> Unit // 퀴즈가 끝났을 때 호출할 콜백
 ) {
     val repository = QuizRepository()
     var problems by remember { mutableStateOf<List<Problem>>(emptyList()) }
@@ -38,6 +37,7 @@ fun QuizPage(
             onSuccess = { quizCategory ->
                 title = quizCategory?.title ?: "Unknown"
                 problems = quizCategory?.problems ?: emptyList()
+
             },
             onError = { exception ->
                 println("Error fetching problems: ${exception.message}")
@@ -58,7 +58,6 @@ fun QuizPage(
             isCorrect = isCorrect
         )
     }
-
 
     if (problems.isNotEmpty()) {
         val currentProblem = problems[currentIndex]
@@ -177,6 +176,7 @@ fun QuizPage(
 
                     if (isCorrect) {
                         score++
+                        println("[SCORE]:$score")
                     }
                     saveQuizResult(isCorrect) // 데이터 저장 로직 호출
 
@@ -184,7 +184,7 @@ fun QuizPage(
                         currentIndex++
                         selectedOption = null // 선택 초기화
                     } else {
-                        onFinishQuiz()
+                        onFinishQuiz(score, problems.size)
                     }
                 },
                 modifier = Modifier

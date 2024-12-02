@@ -2,6 +2,7 @@ package com.example.firebaseexample
 
 import QuizListPage
 import QuizPage
+import QuizViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,6 +28,8 @@ class MainActivity : ComponentActivity() {
 
                 // 로그인 상태 관찰
                 val isLoggedIn = authViewModel.isLoggedIn
+
+                val quizViewModel: QuizViewModel = viewModel()
 
                 NavHost(
                     navController = navController,
@@ -79,7 +82,8 @@ class MainActivity : ComponentActivity() {
                         val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
                         QuizPage(
                             categoryId = categoryId,
-                            onFinishQuiz = {
+                            onFinishQuiz = { finalScore, totalQuestions ->
+                                quizViewModel.updateScore(finalScore, totalQuestions) // 뷰모델 업데이트
                                 navController.navigate("quizResult") {
                                     popUpTo("quizList") { inclusive = true } // 퀴즈 목록으로 돌아갈 때 히스토리를 제거
                                 }
@@ -90,8 +94,8 @@ class MainActivity : ComponentActivity() {
                     // 퀴즈 결과 페이지
                     composable(route = "quizResult") {
                         QuizResultPage(
-                            score = 0, // 점수를 전달받아야 하면 NavArgs 활용
-                            totalQuestions = 10, // 전체 문제 수
+                            score = quizViewModel.score.intValue,
+                            totalQuestions = quizViewModel.totalQuestions.intValue,
                             onRestartQuiz = { navController.navigate("quizList") },
                             onGoToMainPage = { navController.navigate("main") }
                         )
