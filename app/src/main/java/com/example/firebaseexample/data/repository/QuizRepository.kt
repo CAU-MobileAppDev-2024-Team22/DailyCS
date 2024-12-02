@@ -1,10 +1,14 @@
 package com.example.firebaseexample.data.repository
 
+import QuizViewModel
+import android.icu.text.SimpleDateFormat
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.model.QuizCategory
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
+import java.util.Date
+import java.util.Locale
 
 class QuizRepository {
 
@@ -52,44 +56,68 @@ class QuizRepository {
             }
     }
 
-    // 퀴즈 결과 저장하기
-    fun saveQuizResult(
-        userId: String,
-        categoryName: String,
-        quizId: String,
-        isCorrect: Boolean
+    // 뷰모델 한 번에 저장
+    fun saveAllQuizResults(
+    userId: String,
+    categoryName: String,
+    results: List<Map<String, Any>>
     ) {
         val db = FirebaseFirestore.getInstance()
-        val collectionName = if (isCorrect) "solvedQuizzes" else "wrongQuizzes"
-        // 저장할 데이터 구성
-        val quizResult = mapOf(
-            "isCorrect" to isCorrect
-        )
 
-        // Firestore 경로 설정
-        val categoryRef = db.collection("users")
-            .document(userId)
-            .collection(collectionName)
-            .document(categoryName) // 카테고리 이름이 문서 ID
+        // 현재 날짜를 생성
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        // quizId를 카테고리 문서의 하위 필드로 저장
-        categoryRef.update(mapOf(quizId to quizResult))
-            .addOnSuccessListener {
-                println("맞춤 여부 $isCorrect, 카테고리: $categoryName, ID: $quizId")
-            }
-            .addOnFailureListener { exception ->
-                // 문서가 없는 경우 새로 생성
-                if (exception.message?.contains("No document to update") == true) {
-                    categoryRef.set(mapOf(quizId to quizResult)) // 새 문서 생성
-                        .addOnSuccessListener {
-                            println("New category created and quiz result saved under category $categoryName with ID: $quizId")
-                        }
-                        .addOnFailureListener { setException ->
-                            println("Error creating category and saving quiz result: ${setException.message}")
-                        }
-                } else {
-                    println("Error saving quiz result: ${exception.message}")
+        // 결과를 정답과 오답으로 분리
+        val solvedQuizzes = results.filter { it["isCorrect"] == true }
+        val wrongQuizzes = results.filter { it["isCorrect"] == false }
+
+        // Firestore에 저장하는 함수
+        fun saveToFirestore(
+            collectionName: String,
+            quizzes: List<Map<String, Any>>,
+            categoryName: String,
+            addDatePath: Boolean
+        ) {
+            if (quizzes.isNotEmpty()) {
+                val documentData = quizzes.associate { quiz ->
+                    quiz["quizId"].toString() to mapOf(
+                        "isCorrect" to quiz["isCorrect"],
+                        "categoryName" to quiz["categoryName"],
+                        "date" to currentDate // 각 데이터에 날짜 추가
+                    )
                 }
+
+                val targetCollectionRef = if (addDatePath) {
+                    db.collection("users")
+                        .document(userId)
+                        .collection("date")
+                        .document(currentDate)
+                        .collection(collectionName)
+                        .document(categoryName) // 날짜/정답 또는 오답/카테고리
+                } else {
+                    db.collection("users")
+                        .document(userId)
+                        .collection(collectionName)
+                        .document(categoryName) // 정답 또는 오답/카테고리
+                }
+
+                targetCollectionRef.set(documentData, SetOptions.merge()) // 병합 옵션으로 저장
+                    .addOnSuccessListener {
+                        val location = if (addDatePath) "date/$currentDate/$collectionName/$categoryName" else "$collectionName/$categoryName"
+                        println("Saved to $location successfully!")
+                    }
+                    .addOnFailureListener { exception ->
+                        println("Error saving to $collectionName/$categoryName: ${exception.message}")
+                    }
             }
+        }
+
+        // 각각의 컬렉션에 저장
+        saveToFirestore("solved", solvedQuizzes, categoryName, addDatePath = false) // 정답 저장
+        saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = false)  // 오답 저장
+
+        // 날짜별 저장
+        saveToFirestore("solved", solvedQuizzes, categoryName, addDatePath = true) // 날짜별 정답 저장
+        saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = true)  // 날짜별 오답 저장
     }
 }

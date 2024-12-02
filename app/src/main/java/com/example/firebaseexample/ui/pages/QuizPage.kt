@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.repository.QuizRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -29,7 +30,7 @@ fun QuizPage(
 
     var title by remember { mutableStateOf("") }
     val currentUser = FirebaseAuth.getInstance().currentUser?.uid
-
+    val quizViewModel: QuizViewModel = viewModel()
     // Firestore에서 문제 가져오기
     LaunchedEffect(Unit) {
         repository.fetchQuizByCategory(
@@ -42,20 +43,6 @@ fun QuizPage(
             onError = { exception ->
                 println("Error fetching problems: ${exception.message}")
             }
-        )
-    }
-
-    // 현재 문제 결과 저장 함수
-    fun saveQuizResult(isCorrect: Boolean) {
-        if (currentUser == null) {
-            println("User not logged in, cannot save quiz result")
-            return
-        }
-        repository.saveQuizResult(
-            userId = currentUser,
-            categoryName = title,
-            quizId = currentIndex.toString(),
-            isCorrect = isCorrect
         )
     }
 
@@ -178,12 +165,24 @@ fun QuizPage(
                         score++
                         println("[SCORE]:$score")
                     }
-                    saveQuizResult(isCorrect) // 데이터 저장 로직 호출
+                    // 뷰모델에 데이터 저장
+                    quizViewModel.addQuizResult(
+                        categoryName = title,
+                        quizId = currentIndex.toString(),
+                        isCorrect = isCorrect
+                    )
 
                     if (currentIndex < problems.size - 1) {
                         currentIndex++
                         selectedOption = null // 선택 초기화
                     } else {
+                        // 모든 문제를 푼 후 Firestore로 데이터 전송
+                        repository.saveAllQuizResults(
+                            userId = currentUser ?: "",
+                            categoryName = title,
+                            results = quizViewModel.getAllResults()
+                        )
+                        quizViewModel.clearResults() // 뷰모델 데이터 초기화
                         onFinishQuiz(score, problems.size)
                     }
                 },
