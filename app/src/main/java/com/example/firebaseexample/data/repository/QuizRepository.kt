@@ -3,6 +3,8 @@ package com.example.firebaseexample.data.repository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.model.QuizCategory
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.SetOptions
 
 class QuizRepository {
 
@@ -47,6 +49,47 @@ class QuizRepository {
             }
             .addOnFailureListener { exception ->
                 onError(exception)
+            }
+    }
+
+    // 퀴즈 결과 저장하기
+    fun saveQuizResult(
+        userId: String,
+        categoryName: String,
+        quizId: String,
+        isCorrect: Boolean
+    ) {
+        val db = FirebaseFirestore.getInstance()
+
+        // 저장할 데이터 구성
+        val quizResult = mapOf(
+            "isCorrect" to isCorrect
+        )
+
+        // Firestore 경로 설정
+        val categoryRef = db.collection("users")
+            .document(userId)
+            .collection("solvedQuizzes")
+            .document(categoryName) // 카테고리 이름이 문서 ID
+
+        // quizId를 카테고리 문서의 하위 필드로 저장
+        categoryRef.update(mapOf(quizId to quizResult))
+            .addOnSuccessListener {
+                println("Quiz result saved successfully under category $categoryName with ID: $quizId")
+            }
+            .addOnFailureListener { exception ->
+                // 문서가 없는 경우 새로 생성
+                if (exception.message?.contains("No document to update") == true) {
+                    categoryRef.set(mapOf(quizId to quizResult)) // 새 문서 생성
+                        .addOnSuccessListener {
+                            println("New category created and quiz result saved under category $categoryName with ID: $quizId")
+                        }
+                        .addOnFailureListener { setException ->
+                            println("Error creating category and saving quiz result: ${setException.message}")
+                        }
+                } else {
+                    println("Error saving quiz result: ${exception.message}")
+                }
             }
     }
 }

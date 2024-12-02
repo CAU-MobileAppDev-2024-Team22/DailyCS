@@ -1,3 +1,4 @@
+import android.icu.util.ULocale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.repository.QuizRepository
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun QuizPage(
@@ -26,11 +28,15 @@ fun QuizPage(
     var score by remember { mutableStateOf(0) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
 
+    var title by remember { mutableStateOf("") }
+    val currentUser = FirebaseAuth.getInstance().currentUser?.uid
+
     // Firestore에서 문제 가져오기
     LaunchedEffect(Unit) {
         repository.fetchQuizByCategory(
             categoryId = categoryId,
             onSuccess = { quizCategory ->
+                title = quizCategory?.title ?: "Unknown"
                 problems = quizCategory?.problems ?: emptyList()
             },
             onError = { exception ->
@@ -38,6 +44,21 @@ fun QuizPage(
             }
         )
     }
+
+    // 현재 문제 결과 저장 함수
+    fun saveQuizResult(isCorrect: Boolean) {
+        if (currentUser == null) {
+            println("User not logged in, cannot save quiz result")
+            return
+        }
+        repository.saveQuizResult(
+            userId = currentUser,
+            categoryName = title,
+            quizId = currentIndex.toString(),
+            isCorrect = isCorrect
+        )
+    }
+
 
     if (problems.isNotEmpty()) {
         val currentProblem = problems[currentIndex]
@@ -152,9 +173,13 @@ fun QuizPage(
             // 제출 버튼
             Button(
                 onClick = {
-                    if (selectedOption == currentProblem.answer) {
+                    val isCorrect = selectedOption == currentProblem.answer
+
+                    if (isCorrect) {
                         score++
                     }
+                    saveQuizResult(isCorrect) // 데이터 저장 로직 호출
+
                     if (currentIndex < problems.size - 1) {
                         currentIndex++
                         selectedOption = null // 선택 초기화
