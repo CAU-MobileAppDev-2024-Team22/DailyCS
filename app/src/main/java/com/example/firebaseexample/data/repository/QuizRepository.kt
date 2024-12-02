@@ -60,7 +60,7 @@ class QuizRepository {
         isCorrect: Boolean
     ) {
         val db = FirebaseFirestore.getInstance()
-
+        val collectionName = if (isCorrect) "solvedQuizzes" else "wrongQuizzes"
         // 저장할 데이터 구성
         val quizResult = mapOf(
             "isCorrect" to isCorrect
@@ -69,7 +69,7 @@ class QuizRepository {
         // Firestore 경로 설정
         val categoryRef = db.collection("users")
             .document(userId)
-            .collection("solvedQuizzes")
+            .collection(collectionName)
             .document(categoryName) // 카테고리 이름이 문서 ID
 
         // quizId를 카테고리 문서의 하위 필드로 저장
