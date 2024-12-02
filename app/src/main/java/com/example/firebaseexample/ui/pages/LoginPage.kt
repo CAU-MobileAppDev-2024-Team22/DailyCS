@@ -78,13 +78,12 @@ fun LoginPage(
         ) {
             Text(
                 text = "매일CS",
-                style = Typography.titleLarge,
                 fontWeight = FontWeight.Bold,
+                style = Typography.titleLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "매일 늘려가는 CS 지식 한 걸음",
-                style = Typography.titleMedium,
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -119,7 +118,6 @@ fun LoginPage(
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 shape = RoundedCornerShape(12.dp),
-
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = ThemeBlue,
                     unfocusedBorderColor = TextFieldBorder
@@ -141,7 +139,6 @@ fun LoginPage(
             ) {
                 Text(
                     text = "로그인",
-                    style = Typography.bodyMedium
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -173,11 +170,10 @@ fun LoginPage(
                 onClick = goToRegisterPage
             ) {
                 Text(
-                    text = "Register your email",
+                    text = "회원가입",
                     modifier = Modifier.weight(1f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    color = ThemeBlue,
-                    style = Typography.bodySmall
+                    color = ThemeGray,
                 )
             }
         }

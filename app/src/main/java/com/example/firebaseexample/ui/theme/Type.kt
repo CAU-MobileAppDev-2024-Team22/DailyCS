@@ -29,19 +29,19 @@ val Typography = Typography(
     titleMedium = TextStyle(
         fontFamily = inter,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
+        fontSize = 20.sp,
         letterSpacing = 0.3.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = inter,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp,
+        fontSize = 16.sp,
         letterSpacing = 0.5.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = inter,
         fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
+        fontSize = 14.sp,
         letterSpacing = 0.5.sp
     ),
     bodySmall = TextStyle(

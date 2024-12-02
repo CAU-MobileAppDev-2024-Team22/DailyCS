@@ -28,6 +28,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.ui.Alignment
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.components.QuizCard
+import com.example.firebaseexample.ui.theme.Typography
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +40,7 @@ fun MainPage(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "푸앙", style = MaterialTheme.typography.titleLarge) },
+                title = { Text(text = "푸앙", style = Typography.titleLarge) },
                 actions = {
                     IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
                         Icon(
