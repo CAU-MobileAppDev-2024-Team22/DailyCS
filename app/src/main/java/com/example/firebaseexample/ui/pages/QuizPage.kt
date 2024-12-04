@@ -12,13 +12,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.repository.QuizRepository
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun QuizPage(
     categoryId: String,
-    onFinishQuiz: () -> Unit // 퀴즈가 끝났을 때 호출할 콜백
+    onFinishQuiz: (Any?, Any?) -> Unit // 퀴즈가 끝났을 때 호출할 콜백
 ) {
     val repository = QuizRepository()
     var problems by remember { mutableStateOf<List<Problem>>(emptyList()) }
@@ -26,12 +28,17 @@ fun QuizPage(
     var score by remember { mutableStateOf(0) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
 
+    var title by remember { mutableStateOf("") }
+    val currentUser = FirebaseAuth.getInstance().currentUser?.uid
+    val quizViewModel: QuizViewModel = viewModel()
     // Firestore에서 문제 가져오기
     LaunchedEffect(Unit) {
         repository.fetchQuizByCategory(
             categoryId = categoryId,
             onSuccess = { quizCategory ->
+                title = quizCategory?.title ?: "Unknown"
                 problems = quizCategory?.problems ?: emptyList()
+
             },
             onError = { exception ->
                 println("Error fetching problems: ${exception.message}")
@@ -152,14 +159,31 @@ fun QuizPage(
             // 제출 버튼
             Button(
                 onClick = {
-                    if (selectedOption == currentProblem.answer) {
+                    val isCorrect = selectedOption == currentProblem.answer
+
+                    if (isCorrect) {
                         score++
+                        println("[SCORE]:$score")
                     }
+                    // 뷰모델에 데이터 저장
+                    quizViewModel.addQuizResult(
+                        categoryName = title,
+                        quizId = currentIndex.toString(),
+                        isCorrect = isCorrect
+                    )
+
                     if (currentIndex < problems.size - 1) {
                         currentIndex++
                         selectedOption = null // 선택 초기화
                     } else {
-                        onFinishQuiz()
+                        // 모든 문제를 푼 후 Firestore로 데이터 전송
+                        repository.saveAllQuizResults(
+                            userId = currentUser ?: "",
+                            categoryName = title,
+                            results = quizViewModel.getAllResults()
+                        )
+                        quizViewModel.clearResults() // 뷰모델 데이터 초기화
+                        onFinishQuiz(score, problems.size)
                     }
                 },
                 modifier = Modifier
