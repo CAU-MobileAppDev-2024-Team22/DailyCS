@@ -14,13 +14,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.firebaseexample.data.model.QuizCategory
 import com.example.firebaseexample.viewmodel.QuizListViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun QuizListPage(
-    onCategoryClick: (String) -> Unit
+    onCategoryClick: (String) -> Unit,
+    navController: NavController // NavController 추가
 ) {
     val viewModel: QuizListViewModel = viewModel()
     val quizCategories by viewModel.quizCategories.collectAsState()
@@ -35,6 +37,7 @@ fun QuizListPage(
         if (quizCategories.isEmpty()) {
             isLoading = false
             hasError = true // 데이터 로딩 실패 처리
+            navController.navigate("errorPage") // 에러 페이지로 이동
         } else {
             isLoading = false
         }
@@ -47,19 +50,6 @@ fun QuizListPage(
             isLoading -> {
                 // 로딩 화면
                 LoadingAnimation()
-            }
-            hasError -> {
-                // 에러 메시지
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "데이터를 불러올 수 없습니다.",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
             }
             else -> {
                 // 데이터 화면
@@ -132,3 +122,4 @@ fun QuizCategoryCard(
         }
     }
 }
+
