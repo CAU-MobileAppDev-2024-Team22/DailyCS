@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.firebaseexample.ui.components.CircularChart
 
 @Composable
 fun QuizResultPage(
@@ -30,9 +31,15 @@ fun QuizResultPage(
                 text = "퀴즈 완료!",
                 style = MaterialTheme.typography.headlineMedium
             )
-            Text(
-                text = "점수: $score / $totalQuestions",
-                style = MaterialTheme.typography.titleMedium
+//            Text(
+//                text = "점수: $score / $totalQuestions",
+//                style = MaterialTheme.typography.titleMedium
+//            )
+            // 차트
+            CircularChart(
+                progress = score.toFloat() / totalQuestions.toFloat(),
+                score = score,
+                totalQuestions = totalQuestions
             )
 
             // 다시 퀴즈 풀기 버튼
