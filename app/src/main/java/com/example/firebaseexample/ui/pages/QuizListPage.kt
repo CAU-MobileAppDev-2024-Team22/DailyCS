@@ -62,7 +62,7 @@ fun QuizListPage(
                     quizCategories.forEach { (categoryId, category) ->
                         item {
                             QuizCategoryCard(
-                                title = categoryId,
+                                title = category.title,
                                 score = category.problems.size, // 푼 문제로 수정 필요
                                 prob_num = category.problems.size,
                                 onClick = { onCategoryClick(categoryId) }
