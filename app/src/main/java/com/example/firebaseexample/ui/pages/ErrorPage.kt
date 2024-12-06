@@ -12,12 +12,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun ErrorPage(
-    onRetry: () -> Unit,
-    onGoToMain: () -> Unit // 메인 화면으로 가기 콜백 추가
+    onRetry: () -> Unit = {}, // 기본 빈 콜백 추가
+    onGoToMain: () -> Unit = {} // 기본 빈 콜백 추가
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -25,14 +26,14 @@ fun ErrorPage(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+
         ) {
             Text(
                 text = "데이터를 불러올 수 없습니다.",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.error
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             Button(onClick = onRetry) {
                 Text(text = "다시 시도")
             }
@@ -42,4 +43,13 @@ fun ErrorPage(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewErrorPage() {
+    ErrorPage(
+        onRetry = { println("Retry clicked") },
+        onGoToMain = { println("Go to Main clicked") }
+    )
 }
