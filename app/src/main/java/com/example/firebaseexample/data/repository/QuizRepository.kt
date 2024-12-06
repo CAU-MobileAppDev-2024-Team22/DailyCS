@@ -58,9 +58,9 @@ class QuizRepository {
 
     // 뷰모델 한 번에 저장
     fun saveAllQuizResults(
-    userId: String,
-    categoryName: String,
-    results: List<Map<String, Any>>
+        userId: String,
+        categoryName: String,
+        results: List<Map<String, Any>>
     ) {
         val db = FirebaseFirestore.getInstance()
 
