@@ -3,10 +3,12 @@ package com.example.firebaseexample
 import QuizListPage
 import QuizPage
 import QuizViewModel
+import TodayQuizPage
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,8 +16,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.firebaseexample.ui.pages.*
 import com.example.firebaseexample.ui.theme.FirebaseExampleTheme
 import com.example.firebaseexample.viewmodel.AuthViewModel
+import com.example.firebaseexample.viewmodel.TodayQuizViewModel
 import com.google.firebase.FirebaseApp
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +35,7 @@ class MainActivity : ComponentActivity() {
                 val isLoggedIn = authViewModel.isLoggedIn
 
                 val quizViewModel: QuizViewModel = viewModel()
-
+                val todayQuizViewModel: TodayQuizViewModel = hiltViewModel()
                 NavHost(
                     navController = navController,
                     startDestination = if (isLoggedIn) "main" else "login",
@@ -64,7 +69,8 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("main") { inclusive = true }
                                 }
                             },
-                            goToQuizListPage = { navController.navigate(route = "quizList") }
+                            goToQuizListPage = { navController.navigate(route = "quizList") },
+                            goToTodayQuizPage = { navController.navigate(route = "todayQuiz") }
                         )
                     }
 
@@ -100,7 +106,7 @@ class MainActivity : ComponentActivity() {
                             },
                             onFinishQuiz = { finalScore, totalQuestions ->
                                 quizViewModel.updateScore(finalScore, totalQuestions) // 뷰모델 업데이트
-                                navController.navigate("quizResult") {
+                                navController.navigate("quizResult/$finalScore/$totalQuestions") {
                                     popUpTo("quizList") { inclusive = true } // 퀴즈 목록으로 돌아갈 때 히스토리를 제거
                                 }
                             }
@@ -108,14 +114,32 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // 퀴즈 결과 페이지
-                    composable(route = "quizResult") {
+                    composable(route = "quizResult/{score}/{totalQuestions}") { backStackEntry ->
+                        val score = backStackEntry.arguments?.getString("score")?.toIntOrNull() ?: 0
+                        val totalQuestions = backStackEntry.arguments?.getString("totalQuestions")?.toIntOrNull() ?: 10
                         QuizResultPage(
-                            score = quizViewModel.score.intValue,
-                            totalQuestions = quizViewModel.totalQuestions.intValue,
+                            score = score,
+                            totalQuestions = totalQuestions,
                             onRestartQuiz = { navController.navigate("quizList") },
                             onGoToMainPage = { navController.navigate("main") }
                         )
                     }
+
+                    // 오늘의 퀴즈 페이지
+                    composable(route = "todayQuiz") {
+                        TodayQuizPage(
+                            todayQuizViewModel,
+                            onFinishQuiz = { finalScore ->
+                                navController.navigate("quizResult/$finalScore")
+                            },
+                            onTimeout = {
+                                navController.navigate("errorPage") {
+                                    popUpTo("main") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
                 }
             }
         }

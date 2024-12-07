@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -51,8 +53,8 @@ android {
 }
 
 dependencies {
-
-
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.androidx.core.ktx)
@@ -78,4 +80,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.material3)
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
 }

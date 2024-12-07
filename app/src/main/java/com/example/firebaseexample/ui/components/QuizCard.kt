@@ -17,19 +17,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+
+import androidx.compose.foundation.clickable
+
+
 @Composable
 fun QuizCard(
     title: String,
     subtitle: String,
     tag: String,
     time: String,
-    backgroundColor: Color
+    backgroundColor: Color,
+    onClick: () -> Unit // 클릭 이벤트 추가
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp), // 카드 높이를 사진과 유사하게 조정
-//            .padding(4.dp), // 외부 여백
+            .height(120.dp) // 카드 높이를 사진과 유사하게 조정
+            .clickable { onClick() }, // 클릭 이벤트 추가
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         shape = MaterialTheme.shapes.medium // 모서리 둥글게
     ) {

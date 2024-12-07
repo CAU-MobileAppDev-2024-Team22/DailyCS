@@ -45,11 +45,11 @@ fun ErrorPage(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewErrorPage() {
-    ErrorPage(
-        onRetry = { println("Retry clicked") },
-        onGoToMain = { println("Go to Main clicked") }
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewErrorPage() {
+//    ErrorPage(
+//        onRetry = { println("Retry clicked") },
+//        onGoToMain = { println("Go to Main clicked") }
+//    )
+//}

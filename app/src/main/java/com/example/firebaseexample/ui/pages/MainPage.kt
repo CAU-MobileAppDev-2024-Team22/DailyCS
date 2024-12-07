@@ -26,81 +26,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.components.QuizCard
 import com.example.firebaseexample.ui.theme.Typography
+import com.example.firebaseexample.viewmodel.TodayQuizViewModel
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainPage(
-    onLogout: () -> Unit,
-    goToQuizListPage: ()->Unit
-) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "푸앙", style = Typography.titleLarge) },
-                actions = {
-                    IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile"
-                        )
-                    }
-                }
-            )
-        },
-        bottomBar = { BottomNavigationBar() }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(16.dp) // 동일한 padding 적용
-        ) {
-            // 달력 섹션
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth() // 가로 크기를 화면에 맞춤
-                    .padding(0.dp), // 내부 패딩 제거
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                CalendarPage() // 달력을 카드 안에 포함
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 카드 섹션
-            QuizCard(
-                title = "오늘의 퀴즈",
-                subtitle = "10문제",
-                tag = "운영체제",
-                time = "3 min",
-                backgroundColor = Color(0xFF3D8A74)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            QuizCard(
-                title = "복습 추천 문제",
-                subtitle = "5문제",
-                tag = "알고리즘",
-                time = "2 min",
-                backgroundColor = Color(0xFF5D5D5D)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ButtonCard(
-                title = "유형별 문제 풀기",
-                backgroundColor = Color(0xFF9084FF),
-                onClick = { goToQuizListPage() }
-            )
-        }
-    }
-}
 
 @Composable
 fun ButtonCard(
@@ -127,6 +58,84 @@ fun ButtonCard(
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 modifier = Modifier.align(Alignment.CenterVertically) // 수직 가운데 정렬
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainPage(
+    onLogout: () -> Unit,
+    goToQuizListPage: () -> Unit,
+    goToTodayQuizPage: () -> Unit // 오늘의 퀴즈 페이지로 이동
+) {
+    val viewModel: TodayQuizViewModel = viewModel()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "푸앙", style = Typography.titleLarge) },
+                actions = {
+                    IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Profile"
+                        )
+                    }
+                }
+            )
+        },
+        bottomBar = { BottomNavigationBar() }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // 달력 섹션
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth() // 가로 크기를 화면에 맞춤
+                    .padding(0.dp), // 내부 패딩 제거
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                CalendarPage() // 달력을 카드 안에 포함
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            // 오늘의 퀴즈 버튼
+            QuizCard(
+                title = "오늘의 퀴즈",
+                subtitle = "10문제",
+                tag = "랜덤",
+                time = "5 min",
+                backgroundColor = Color(0xFF3D8A74),
+                onClick = {
+                    viewModel.fetchTodayQuiz() // 오늘의 퀴즈 가져오기
+                    goToTodayQuizPage()
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            QuizCard(
+                title = "복습 추천 문제",
+                subtitle = "5문제",
+                tag = "알고리즘",
+                time = "2 min",
+                backgroundColor = Color(0xFF5D5D5D),
+                onClick = { goToQuizListPage() }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ButtonCard(
+                title = "유형별 문제 풀기",
+                backgroundColor = Color(0xFF9084FF),
+                onClick = { goToQuizListPage() }
             )
         }
     }
