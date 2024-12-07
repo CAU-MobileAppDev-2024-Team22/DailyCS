@@ -33,14 +33,33 @@ fun QuizListPage(
 
     // 로딩 상태 타이머 (예: 3초 이상 로드되지 않으면 에러 화면 표시)
     LaunchedEffect(Unit) {
-        delay(3000) // 3초 대기
-        if (quizCategories.isEmpty()) {
-            isLoading = false
-            hasError = true // 데이터 로딩 실패 처리
-            navController.navigate("errorPage") // 에러 페이지로 이동
-        } else {
-            isLoading = false
+
+        while (isLoading) {
+            if (quizCategories.isNotEmpty()) {
+                isLoading = false
+                break
+            }
+            delay(200) // 데이터 확인 주기
         }
+
+        // 3초 이상 데이터가 로드되지 않으면 에러 처리
+        if (isLoading) {
+            delay(3000 - (200 * (3000 / 200))) // 남은 시간 기다림
+            if (quizCategories.isEmpty()) {
+                isLoading = false
+                hasError = true
+                navController.navigate("errorPage") // 에러 페이지로 이동
+            }
+        }
+
+//        delay(3000) // 3초 대기
+//        if (quizCategories.isEmpty()) {
+//            isLoading = false
+//            hasError = true // 데이터 로딩 실패 처리
+//            navController.navigate("errorPage") // 에러 페이지로 이동
+//        } else {
+//            isLoading = false
+//        }
     }
 
     Box(
