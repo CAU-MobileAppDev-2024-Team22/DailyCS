@@ -1,5 +1,6 @@
 package com.example.firebaseexample.ui.pages
 
+import QuizViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -7,14 +8,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.firebaseexample.ui.components.CircularChart
+import com.example.firebaseexample.data.repository.QuizRepository
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun QuizResultPage(
     score: Int,                // 사용자 점수
     totalQuestions: Int,       // 전체 문제 수
     onRestartQuiz: () -> Unit, // 다시 퀴즈 풀기 버튼 콜백
-    onGoToMainPage: () -> Unit // 메인 페이지로 이동 버튼 콜백
+    onGoToMainPage: () -> Unit, // 메인 페이지로 이동 버튼 콜백
+    viewModel: QuizViewModel
 ) {
+    val repository = QuizRepository()
+    val currentUser = FirebaseAuth.getInstance().currentUser?.uid
+
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -59,4 +67,6 @@ fun QuizResultPage(
             }
         }
     }
+    viewModel.resetQuizState()
+
 }
