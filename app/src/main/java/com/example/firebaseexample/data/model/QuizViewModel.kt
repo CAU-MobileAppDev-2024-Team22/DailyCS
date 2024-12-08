@@ -2,6 +2,7 @@ package com.example.firebaseexample.data.model
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.firebaseexample.data.repository.QuizRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,14 +10,32 @@ import kotlinx.coroutines.flow.StateFlow
 class QuizViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
-    // 뷰모델에 데이터 전송 전 데이터
+    // 뷰모델에 결과페이지에서 전송하는 정보를 업데이트한다.
     private val _savedResults = MutableStateFlow<List<Map<String, Any>>>(emptyList())
     val savedResults: StateFlow<List<Map<String, Any>>> = _savedResults
 
-    // 상태 업데이트 메서드
     fun setSavedResults(results: List<Map<String, Any>>) {
         _savedResults.value = results
         println("Saved results to ViewModel: $results")
+    }
+
+    // 뷰모델에 저장해둔 값을 기준으로 FireStore에서 문제 정보를 조회한다.
+    private val repository = QuizRepository()
+    private val _problemQuestion = MutableStateFlow<String?>(null)
+    val problemQuestion: StateFlow<String?> = _problemQuestion
+
+    fun loadProblemQuestion(categoryName: String, quizId: String) {
+        repository.fetchProblemQuestion(
+            categoryName = categoryName,
+            quizId = quizId,
+            onSuccess = { question ->
+                _problemQuestion.value = question.toString()
+                println("Problem question loaded: $question")
+            },
+            onError = { exception ->
+                println("Error loading problem question: ${exception.message}")
+            }
+        )
     }
     // 여기까지
 

@@ -28,6 +28,8 @@ fun QuizResultPage(
 
     // ViewModel에서 저장된 결과를 가져옴
     val savedResults by viewModel.savedResults.collectAsState()
+    val problemQuestion by viewModel.problemQuestion.collectAsState()
+
 
     // 저장된 결과를 로그에 출력
     println("Saved Results: $savedResults")
@@ -63,21 +65,38 @@ fun QuizResultPage(
                 text = "저장된 결과:",
                 style = MaterialTheme.typography.titleMedium
             )
+
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(savedResults) { result ->
                     val quizId = result["quizId"] as? String ?: "Unknown"
+                    val categoryName = result["categoryName"] as? String ?: "Unknown"
                     val isCorrect = result["isCorrect"] as? Boolean ?: false
                     val status = if (isCorrect) "정답" else "오답"
-                    Text(
-                        text = "문제: $quizId - $status",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+
+                    Column {
+                        Text(
+                            text = "문제: $quizId - $status",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Button(onClick = {
+                            viewModel.loadProblemQuestion(categoryName, quizId)
+                        }) {
+                            Text("문제 보기")
+                        }
+                    }
                 }
             }
 
+            // 문제 조회 결과 표시
+            problemQuestion?.let { question ->
+                Text(
+                    text = "문제 내용: $question",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
 
             // 다시 퀴즈 풀기 버튼
             Button(
