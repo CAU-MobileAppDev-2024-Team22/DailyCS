@@ -1,9 +1,12 @@
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +22,8 @@ import com.example.firebaseexample.data.model.QuizCategory
 import com.example.firebaseexample.viewmodel.QuizListViewModel
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun QuizListPage(
     onCategoryClick: (String) -> Unit,
@@ -61,31 +66,46 @@ fun QuizListPage(
 //            isLoading = false
 //        }
     }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("유형별 문제 풀기", style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navController.navigate("main")
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
+        ) {
+            when {
+                isLoading -> {
+                    // 로딩 화면
+                    LoadingAnimation()
+                }
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        when {
-            isLoading -> {
-                // 로딩 화면
-                LoadingAnimation()
-            }
-            else -> {
-                // 데이터 화면
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 32.dp, start = 16.dp, end = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    quizCategories.forEach { (categoryId, category) ->
-                        item {
-                            QuizCategoryCard(
-                                title = category.title,
-                                score = category.problems.size, // 푼 문제로 수정 필요
-                                prob_num = category.problems.size,
-                                onClick = { onCategoryClick(categoryId) }
-                            )
+                else -> {
+                    // 데이터 화면
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 32.dp, start = 16.dp, end = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        quizCategories.forEach { (categoryId, category) ->
+                            item {
+                                QuizCategoryCard(
+                                    title = category.title,
+                                    score = category.problems.size, // 푼 문제로 수정 필요
+                                    prob_num = category.problems.size,
+                                    onClick = { onCategoryClick(categoryId) }
+                                )
+                            }
                         }
                     }
                 }
@@ -106,7 +126,7 @@ fun QuizCategoryCard(
             .fillMaxWidth()
             .height(100.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF6F5ACD)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF65558F)),
         shape = MaterialTheme.shapes.medium
     ) {
         Row(
