@@ -24,14 +24,17 @@ class QuizViewModel() : ViewModel() {
     var totalQuestions = mutableStateOf(0)
         private set
 
-    var isButtonEnabled = false
+    var isButtonEnabled = mutableStateOf(false)
+        private set
+
+    var brushUpCategory = mutableStateOf("")
         private set
 
     private val quizResults = mutableListOf<Map<String, Any>>()
 
     fun checkWrongAnswers() {
         viewModelScope.launch {
-            isButtonEnabled = repository.checkWrongAnswers()
+            isButtonEnabled.value = repository.checkWrongAnswers(this@QuizViewModel)
         }
     }
 

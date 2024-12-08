@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,17 +48,13 @@ fun MainPage(
     onLogout: () -> Unit,
     goToQuizListPage: () -> Unit,
     goToTodayQuizPage: () -> Unit, // 오늘의 퀴즈 페이지로 이동하는 콜백
-    goToBrushQuizPage: () -> Unit // 복습 추천 문제 페이지로 이등하는 콜백
+    goToBrushQuizPage: () -> Unit // 복습 추천 문제 페이지로 이동하는 콜백
 ) {
-    var totalWrongAnswers by remember { mutableStateOf(0) }
-    var isButtonEnabled by remember { mutableStateOf(false) }
-
-    // 틀린 문제 수 체크
+    var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
+// 틀린 문제 수 체크
     LaunchedEffect(Unit) {
         viewModel.checkWrongAnswers()
     }
-
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -107,12 +104,18 @@ fun MainPage(
 
             // 복습 추천 문제 카드
             QuizCard(
-                title = if (viewModel.isButtonEnabled) "복습 추천 문제" else "복습 추천 문제(비활성화)",
+                title = if (viewModel.isButtonEnabled.value) "복습 추천 문제" else "복습 추천 문제(비활성화)",
                 subtitle = "5문제",
                 tag = "알고리즘",
                 time = "2 min",
                 backgroundColor = Color(0xFF5D5D5D),
-                onClick = { if (viewModel.isButtonEnabled) goToBrushQuizPage() }
+                onClick = {
+                    if (viewModel.isButtonEnabled.value) {
+                        goToBrushQuizPage()
+                    } else {
+                        showDialog = true // 팝업창 띄우기
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -124,8 +127,23 @@ fun MainPage(
                 onClick = { goToQuizListPage() } // 클릭 시 카테고리 퀴즈로 이동
             )
         }
+
+        // 경고 팝업
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    Button(onClick = { showDialog = false }) {
+                        Text("확인")
+                    }
+                },
+                title = { Text("알림") },
+                text = { Text("복습 추천 문제를 활성화하려면 조건을 충족해야 합니다.") }
+            )
+        }
     }
 }
+
 
 @Composable
 fun QuizCard(

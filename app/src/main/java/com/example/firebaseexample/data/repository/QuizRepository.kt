@@ -2,6 +2,7 @@ package com.example.firebaseexample.data.repository
 
 import QuizViewModel
 import android.icu.text.SimpleDateFormat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.model.QuizCategory
@@ -133,11 +134,14 @@ class QuizRepository {
         saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = true)  // 날짜별 오답 저장
     }
 
-    suspend fun checkWrongAnswers(): Boolean {
+    suspend fun checkWrongAnswers(
+        viewModel: QuizViewModel
+    ): Boolean {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         val subjects = listOf("운영체제", "네트워크", "컴퓨터구조", "자료구조", "알고리즘", "데이터베이스")
         var totalWrongAnswers = 0
-
+        var maxWrongCategory = 0
+        println(userId)
         for (subject in subjects) {
             val documentSnapshot = userId?.let {
                 db.collection("users")
@@ -158,14 +162,20 @@ class QuizRepository {
                             0
                         }
                     } ?: 0
+                    if(maxWrongCategory < wrongAnswers){
+                        maxWrongCategory = wrongAnswers
+                        viewModel.brushUpCategory.value = subject
+                    }
                     totalWrongAnswers += wrongAnswers
-
+                    println("total: $totalWrongAnswers")
                 } else {
                     println("문서 '$subject'가 존재하지 않습니다.")
                 }
             }
-        }
 
+        }
+        println(viewModel.brushUpCategory.value)
+        println(maxWrongCategory)
         return totalWrongAnswers >= 15 // 5*3 이상인지 여부 반환
     }
 }
