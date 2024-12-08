@@ -1,11 +1,9 @@
 package com.example.firebaseexample.data.repository
 
-import QuizViewModel
+import com.example.firebaseexample.data.model.QuizViewModel
 import android.icu.text.SimpleDateFormat
 import com.google.firebase.firestore.FirebaseFirestore
-import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.model.QuizCategory
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import java.util.Date
 import java.util.Locale
@@ -70,7 +68,8 @@ class QuizRepository {
     fun saveAllQuizResults(
         userId: String,
         categoryName: String,
-        results: List<Map<String, Any>>
+        results: List<Map<String, Any>>,
+        viewModel: QuizViewModel
     ) {
         val db = FirebaseFirestore.getInstance()
 
@@ -121,7 +120,12 @@ class QuizRepository {
                     }
             }
         }
-
+        // ViewModel에 저장 결과 업데이트
+        if (results.isNotEmpty()) {
+            viewModel.setSavedResults(results)
+        } else {
+            println("No results to save to ViewModel.")
+        }
         // 각각의 컬렉션에 저장
         saveToFirestore("solved", solvedQuizzes, categoryName, addDatePath = false) // 정답 저장
         saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = false)  // 오답 저장

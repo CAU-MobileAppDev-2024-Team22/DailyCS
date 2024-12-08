@@ -1,9 +1,13 @@
 package com.example.firebaseexample.ui.pages
 
-import QuizViewModel
+import com.example.firebaseexample.data.model.QuizViewModel
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,7 +26,11 @@ fun QuizResultPage(
     val repository = QuizRepository()
     val currentUser = FirebaseAuth.getInstance().currentUser?.uid
 
+    // ViewModel에서 저장된 결과를 가져옴
+    val savedResults by viewModel.savedResults.collectAsState()
 
+    // 저장된 결과를 로그에 출력
+    println("Saved Results: $savedResults")
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -49,6 +57,27 @@ fun QuizResultPage(
                 score = score,
                 totalQuestions = totalQuestions
             )
+
+            // 저장된 결과 출력
+            Text(
+                text = "저장된 결과:",
+                style = MaterialTheme.typography.titleMedium
+            )
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(savedResults) { result ->
+                    val quizId = result["quizId"] as? String ?: "Unknown"
+                    val isCorrect = result["isCorrect"] as? Boolean ?: false
+                    val status = if (isCorrect) "정답" else "오답"
+                    Text(
+                        text = "문제: $quizId - $status",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
 
             // 다시 퀴즈 풀기 버튼
             Button(

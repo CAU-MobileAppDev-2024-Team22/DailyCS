@@ -1,7 +1,7 @@
 package com.example.firebaseexample.ui.components
 
 import LoadingAnimation
-import QuizViewModel
+import com.example.firebaseexample.data.model.QuizViewModel
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -76,7 +75,8 @@ fun QuizScreen(
                             repository.saveAllQuizResults(
                                 userId = currentUser ?: "",
                                 categoryName = categoryName,
-                                results = viewModel.getAllResults()
+                                results = viewModel.getAllResults(),
+                                viewModel = viewModel,
                             )
                             viewModel.resetQuizState()
                         }
@@ -119,7 +119,8 @@ fun QuizScreen(
                         repository.saveAllQuizResults(
                             userId = currentUser ?: "",
                             categoryName = categoryName,
-                            results = viewModel.getAllResults()
+                            results = viewModel.getAllResults(),
+                            viewModel = viewModel,
                         )
                         viewModel.resetQuizState()
                     }

@@ -1,9 +1,24 @@
+package com.example.firebaseexample.data.model
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class QuizViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+
+    // 뷰모델에 데이터 전송 전 데이터
+    private val _savedResults = MutableStateFlow<List<Map<String, Any>>>(emptyList())
+    val savedResults: StateFlow<List<Map<String, Any>>> = _savedResults
+
+    // 상태 업데이트 메서드
+    fun setSavedResults(results: List<Map<String, Any>>) {
+        _savedResults.value = results
+        println("Saved results to ViewModel: $results")
+    }
+    // 여기까지
 
     var quizzes = mutableStateOf<List<Map<String, Any>>>(emptyList())
         private set
