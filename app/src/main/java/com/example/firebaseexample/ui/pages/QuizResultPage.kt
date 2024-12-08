@@ -50,7 +50,7 @@ fun QuizResultPage(
             // 결과 표시
             Text(
                 text = "퀴즈 완료!",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.titleLarge
             )
 //            Text(
 //                text = "점수: $score / $totalQuestions",
@@ -96,38 +96,40 @@ fun QuizResultPage(
                                 viewModel.loadProblemDetails(categoryName, quizId)
                             }
                         }) {
-                            Text(if (problemDetailsVisibility[quizId] == true) "닫기" else "문제 보기")
+                            Text(
+                                text = if (problemDetailsVisibility[quizId] == true) "닫기" else "문제 보기",
+                                style = MaterialTheme.typography.bodySmall)
                         }
 
                         if (problemDetailsVisibility[quizId] == true) {
                             if (problemDetails != null) {
                                 Text(
                                     text = "질문: ${problemDetails!!["question"] ?: "질문 없음"}",
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(top = 8.dp)
                                 )
                                 Text(
                                     text = "정답: ${problemDetails!!["answer"] ?: "정답 없음"}",
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
                                     text = "코멘트: ${problemDetails!!["comment"] ?: "코멘트 없음"}",
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
                                     text = "선택지:",
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                                 (problemDetails!!["options"] as? List<*>)?.forEachIndexed { index, option ->
                                     Text(
                                         text = "$index: $option",
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
                             } else {
                                 Text(
                                     text = "로딩 중...",
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         }
@@ -145,7 +147,10 @@ fun QuizResultPage(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("다시 풀기")
+                Text(
+                    text = "다시 풀기",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
             // 메인 페이지로 이동 버튼
@@ -158,7 +163,10 @@ fun QuizResultPage(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("메인 페이지로")
+                Text(
+                    text = "메인 페이지로",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }

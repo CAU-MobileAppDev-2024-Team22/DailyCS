@@ -28,6 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.firebaseexample.ui.theme.Typography
+
 @Composable
 fun QuizCard(
     currentQuiz: Map<String, Any>,
@@ -88,7 +91,7 @@ fun QuizCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 20.dp),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            style = Typography.bodyLarge.copy(fontWeight = FontWeight.Normal, fontSize = 20.sp),
                             textAlign = TextAlign.Center,
                             color = Color.Black
                         )
@@ -121,7 +124,7 @@ fun QuizCard(
                         ) {
                             Text(
                                 text = option,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Normal),
                                 color = Color.Black
                             )
                             Spacer(modifier = Modifier.weight(1f))
