@@ -1,6 +1,8 @@
 package com.example.firebaseexample.ui.pages
 
 import CalendarPage
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -35,7 +37,8 @@ import com.example.firebaseexample.ui.theme.Typography
 @Composable
 fun MainPage(
     onLogout: () -> Unit,
-    goToQuizListPage: ()->Unit
+    goToQuizListPage: () -> Unit,
+    goToTodayQuizPage: () -> Unit // 오늘의 퀴즈 페이지로 이동하는 콜백
 ) {
     Scaffold(
         topBar = {
@@ -62,7 +65,7 @@ fun MainPage(
             // 달력 섹션
             Card(
                 modifier = Modifier
-                    .fillMaxWidth() // 가로 크기를 화면에 맞춤
+                    .fillMaxWidth()
                     .padding(0.dp), // 내부 패딩 제거
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -72,31 +75,103 @@ fun MainPage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 카드 섹션
+            // 오늘의 퀴즈 카드
             QuizCard(
                 title = "오늘의 퀴즈",
                 subtitle = "10문제",
                 tag = "운영체제",
                 time = "3 min",
-                backgroundColor = Color(0xFF3D8A74)
+                backgroundColor = Color(0xFF3D8A74),
+                onClick = { goToTodayQuizPage() } // 클릭 시 오늘의 퀴즈로 이동
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // 복습 추천 문제 카드
             QuizCard(
                 title = "복습 추천 문제",
                 subtitle = "5문제",
                 tag = "알고리즘",
                 time = "2 min",
-                backgroundColor = Color(0xFF5D5D5D)
+                backgroundColor = Color(0xFF5D5D5D),
+                onClick = { /* 다른 작업 추가 가능 */ }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // 유형별 문제 풀기 버튼
             ButtonCard(
                 title = "유형별 문제 풀기",
                 backgroundColor = Color(0xFF9084FF),
-                onClick = { goToQuizListPage() }
+                onClick = { goToQuizListPage() } // 클릭 시 카테고리 퀴즈로 이동
+            )
+        }
+    }
+}
+
+@Composable
+fun QuizCard(
+    title: String,
+    subtitle: String,
+    tag: String,
+    time: String,
+    backgroundColor: Color,
+    onClick: () -> Unit // 클릭 이벤트 추가
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .clickable { onClick() }, // 클릭 가능하도록 설정
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp), // 내부 여백
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // 상단 태그와 시간 섹션
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = tag,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .background(
+                            color = Color.White,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+                Text(
+                    text = time,
+                    color = Color.Black,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .background(
+                            color = Color.White,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
+            // 타이틀
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White
+            )
+
+            // 서브타이틀
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White
             )
         }
     }
@@ -112,22 +187,23 @@ fun ButtonCard(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp), // 버튼 높이를 80dp로 설정
+            .height(80.dp),
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(12.dp) // 모서리 둥글기를 12dp로 설정
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 0.dp), // 텍스트와 버튼 경계 사이의 여백
-            verticalAlignment = Alignment.CenterVertically // 수직 가운데 정렬
+                .padding(horizontal = 0.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
-                modifier = Modifier.align(Alignment.CenterVertically) // 수직 가운데 정렬
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
     }
 }
+
