@@ -19,21 +19,31 @@ class QuizViewModel : ViewModel() {
         println("Saved results to ViewModel: $results")
     }
 
-    // 뷰모델에 저장해둔 값을 기준으로 FireStore에서 문제 정보를 조회한다.
+    // 뷰모델에 저장해둔 값을 기준으로 FireStore에서 문제 정보를 조회
     private val repository = QuizRepository()
-    private val _problemQuestion = MutableStateFlow<String?>(null)
-    val problemQuestion: StateFlow<String?> = _problemQuestion
 
-    fun loadProblemQuestion(categoryName: String, quizId: String) {
-        repository.fetchProblemQuestion(
+    // 문제별 상태 관리 (문제 세부사항)
+    private val _problemDetails = mutableMapOf<String, MutableStateFlow<Map<String, Any>?>>()
+
+    // 문제별 상태 Flow 반환
+    fun getProblemDetailsFlow(quizId: String): StateFlow<Map<String, Any>?> {
+        if (!_problemDetails.containsKey(quizId)) {
+            _problemDetails[quizId] = MutableStateFlow(null) // 초기화
+        }
+        return _problemDetails[quizId]!!
+    }
+
+    // quizzes/{categoryName}/problems 하고 넘겨받은 데이터
+    fun loadProblemDetails(categoryName: String, quizId: String) {
+        repository.fetchProblemDetails(
             categoryName = categoryName,
             quizId = quizId,
-            onSuccess = { question ->
-                _problemQuestion.value = question.toString()
-                println("Problem question loaded: $question")
+            onSuccess = { details ->
+                _problemDetails[quizId]?.value = details // 해당 문제 상태 업데이트
             },
             onError = { exception ->
-                println("Error loading problem question: ${exception.message}")
+                println("Error loading problem details for $quizId: ${exception.message}")
+                _problemDetails[quizId]?.value = null
             }
         )
     }

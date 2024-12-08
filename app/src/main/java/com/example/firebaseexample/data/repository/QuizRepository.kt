@@ -135,7 +135,8 @@ class QuizRepository {
         saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = true)  // 날짜별 오답 저장
     }
 
-    fun fetchProblemQuestion(
+    // FireStore 에서 quizzes/{categoryName}/problems 까지 불러옴
+    fun fetchProblemDetails(
         categoryName: String,
         quizId: String,
         onSuccess: (Map<String, Any>?) -> Unit,
@@ -147,22 +148,15 @@ class QuizRepository {
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     val problems = document.get("problems") as? List<Map<String, Any>>
-                    if (problems != null) {
-                        val problem = problems[quizId.toInt()] // 배열에서 특정 인덱스 선택
-                        print("[Problem] $problem")
-                        onSuccess(problem)
-                    } else {
-                        println("Problems array is null or invalid")
-                        onSuccess(null)
-                    }
+                    val problem = problems?.get(quizId.toIntOrNull() ?: -1)
+                    onSuccess(problem) // 문제 데이터를 그대로 반환
                 } else {
-                    println("Document does not exist")
-                    onSuccess(null)
+                    onSuccess(null) // 문서가 존재하지 않는 경우
                 }
             }
             .addOnFailureListener { exception ->
-                println("Error fetching document: ${exception.message}")
                 onError(exception)
             }
     }
+
 }
