@@ -99,8 +99,8 @@ class MainActivity : ComponentActivity() {
                             categoryId = categoryId,
                             viewModel = quizViewModel,
                             onBackPressed = { navController.navigateUp() },
-                            onFinishQuiz = { finalScore ->
-                                navController.navigate("quizResult/$finalScore/${quizViewModel.totalQuestions.value}") {
+                            onFinishQuiz = { finalScore,->
+                                navController.navigate("quizResult/$finalScore/${quizViewModel.solvedQuizzesNum.value}") {
                                     popUpTo("quizList") { inclusive = true }
                                 }
                             }
@@ -115,7 +115,8 @@ class MainActivity : ComponentActivity() {
                             score = score,
                             totalQuestions = totalQuestions,
                             onRestartQuiz = { navController.navigateUp()},
-                            onGoToMainPage = { navController.navigate("main") }
+                            onGoToMainPage = { navController.navigate("main") },
+                            viewModel = QuizViewModel()
                         )
                     }
 
@@ -124,7 +125,7 @@ class MainActivity : ComponentActivity() {
                         TodayQuizPage(
                             viewModel = quizViewModel,
                             onFinishQuiz = { finalScore ->
-                                navController.navigate("quizResult/$finalScore/${quizViewModel.totalQuestions.value}") {
+                                navController.navigate("quizResult/$finalScore/${quizViewModel.solvedQuizzesNum.value}") {
                                     popUpTo("main") { inclusive = true }
                                 }
                             },

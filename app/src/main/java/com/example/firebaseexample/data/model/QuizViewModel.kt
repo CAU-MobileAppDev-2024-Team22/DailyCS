@@ -11,6 +11,9 @@ class QuizViewModel : ViewModel() {
     var score = mutableStateOf(0)
         private set
 
+    var solvedQuizzesNum = mutableStateOf(0)
+        private set
+
     var totalQuestions = mutableStateOf(0)
         private set
 
@@ -70,6 +73,10 @@ class QuizViewModel : ViewModel() {
     }
 
 
+    fun updateSolvedQuzzesNum(){
+        solvedQuizzesNum.value++
+    }
+
     fun updateScore(isCorrect: Boolean) {
         if (isCorrect) {
             score.value++
@@ -80,6 +87,7 @@ class QuizViewModel : ViewModel() {
         quizzes.value = emptyList()
         score.value = 0
         totalQuestions.value = 0
+        solvedQuizzesNum.value = 0
     }
 
     private fun getCurrentDate(): String {
