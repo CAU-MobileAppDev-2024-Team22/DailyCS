@@ -1,9 +1,16 @@
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.firebaseexample.data.repository.QuizRepository
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
-class QuizViewModel : ViewModel() {
+class QuizViewModel() : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+    private val repository = QuizRepository()
 
     var quizzes = mutableStateOf<List<Map<String, Any>>>(emptyList())
         private set
@@ -17,7 +24,16 @@ class QuizViewModel : ViewModel() {
     var totalQuestions = mutableStateOf(0)
         private set
 
+    var isButtonEnabled = false
+        private set
+
     private val quizResults = mutableListOf<Map<String, Any>>()
+
+    fun checkWrongAnswers() {
+        viewModelScope.launch {
+            isButtonEnabled = repository.checkWrongAnswers()
+        }
+    }
 
     fun updateDB(categoryName: String, quizId: String, isCorrect: Boolean){
         val result = mapOf(

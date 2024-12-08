@@ -5,8 +5,10 @@ import android.icu.text.SimpleDateFormat
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.model.QuizCategory
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.tasks.await
 import java.util.Date
 import java.util.Locale
 
@@ -129,5 +131,41 @@ class QuizRepository {
         // 날짜별 저장
         saveToFirestore("solved", solvedQuizzes, categoryName, addDatePath = true) // 날짜별 정답 저장
         saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = true)  // 날짜별 오답 저장
+    }
+
+    suspend fun checkWrongAnswers(): Boolean {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val subjects = listOf("운영체제", "네트워크", "컴퓨터구조", "자료구조", "알고리즘", "데이터베이스")
+        var totalWrongAnswers = 0
+
+        for (subject in subjects) {
+            val documentSnapshot = userId?.let {
+                db.collection("users")
+                    .document(it)
+                    .collection("wrong")
+                    .document(subject)
+                    .get()
+                    .await()
+            } // 비동기 호출
+
+            if (documentSnapshot != null) {
+                if (documentSnapshot.exists()) {
+                    val wrongAnswers = documentSnapshot.data?.values?.sumOf { map ->
+                        if (map is Map<*, *>) {
+                            // 맵의 개수 반환
+                            map.size
+                        } else {
+                            0
+                        }
+                    } ?: 0
+                    totalWrongAnswers += wrongAnswers
+
+                } else {
+                    println("문서 '$subject'가 존재하지 않습니다.")
+                }
+            }
+        }
+
+        return totalWrongAnswers >= 15 // 5*3 이상인지 여부 반환
     }
 }

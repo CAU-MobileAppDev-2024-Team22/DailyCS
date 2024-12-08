@@ -1,5 +1,6 @@
 package com.example.firebaseexample
 
+import BrushupQuizPage
 import QuizListPage
 import QuizViewModel
 import TodayQuizPage
@@ -8,6 +9,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -59,6 +61,7 @@ class MainActivity : ComponentActivity() {
                     // 메인 페이지
                     composable(route = "main") {
                         MainPage(
+                            viewModel = quizViewModel,
                             onLogout = {
                                 authViewModel.setLoggedIn(false)
                                 navController.navigate("login") {
@@ -66,7 +69,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             goToQuizListPage = { navController.navigate("quizList") },
-                            goToTodayQuizPage = { navController.navigate("todayQuiz") }
+                            goToTodayQuizPage = { navController.navigate("todayQuiz") },
+                            goToBrushQuizPage = { navController.navigate("brushupQuiz")},
                         )
                     }
 
@@ -123,6 +127,24 @@ class MainActivity : ComponentActivity() {
                     // 오늘의 퀴즈 페이지
                     composable(route = "todayQuiz") {
                         TodayQuizPage(
+                            viewModel = quizViewModel,
+                            onFinishQuiz = { finalScore ->
+                                navController.navigate("quizResult/$finalScore/${quizViewModel.solvedQuizzesNum.value}") {
+                                    popUpTo("main") { inclusive = true }
+                                }
+                            },
+                            onBackPressed = { navController.navigateUp() },
+                            onTimeout = {
+                                navController.navigate("errorPage") {
+                                    popUpTo("main") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
+                    // 복습 추천 문제 페이지
+                    composable(route = "brushupQuiz") {
+                        BrushupQuizPage(
                             viewModel = quizViewModel,
                             onFinishQuiz = { finalScore ->
                                 navController.navigate("quizResult/$finalScore/${quizViewModel.solvedQuizzesNum.value}") {
