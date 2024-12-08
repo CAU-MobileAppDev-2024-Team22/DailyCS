@@ -25,19 +25,19 @@ fun CircularChart(
     totalQuestions: Int
 ) {
     Box(
-        modifier = Modifier.size(200.dp),
+        modifier = Modifier.size(240.dp),
         contentAlignment = Alignment.Center
     ) {
         PieChart(
             pieChartData = PieChartData(
                 listOf(
-                    PieChartData.Slice(value = progress, color = ThemeBlue), // 녹색 진행도
-                    PieChartData.Slice(value = 1f - progress, color = ThemeLightGray) // 파란색 배경
+                    PieChartData.Slice(value = progress, color = ThemeLightGray), // 녹색 진행도
+                    PieChartData.Slice(value = 1f - progress, color = ThemeBlue) // 파란색 배경
                 )
             ),
             modifier = Modifier.fillMaxSize(),
             animation = simpleChartAnimation(),
-            sliceDrawer = SimpleSliceDrawer(sliceThickness=32f) // 두께 조정
+            sliceDrawer = SimpleSliceDrawer(sliceThickness=48f) // 두께 조정
         )
 
         // 중앙 텍스트 (점수 표시)

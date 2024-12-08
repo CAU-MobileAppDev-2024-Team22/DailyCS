@@ -14,6 +14,7 @@ val Black = Color(0xFF000000)
 val TextFieldBorder = Color(0xFFE0E0E0)
 
 val ThemeGreen = Color(0xFF6FD195)
+val ThemeDarkGreen = Color(0xFF3D8A74)
 val ThemeBlue = Color(0xFF7086FD)
 val ThemeGray = Color(0xFF828282)
 val ThemeLightGray = Color(0xFFC4C4C4)

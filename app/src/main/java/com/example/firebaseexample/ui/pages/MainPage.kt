@@ -30,6 +30,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.ui.Alignment
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.components.QuizCard
+import com.example.firebaseexample.ui.theme.ThemeDarkGreen
 import com.example.firebaseexample.ui.theme.Typography
 
 
@@ -81,7 +82,7 @@ fun MainPage(
                 subtitle = "10문제",
                 tag = "운영체제",
                 time = "3 min",
-                backgroundColor = Color(0xFF3D8A74),
+                backgroundColor = ThemeDarkGreen,
                 onClick = { goToTodayQuizPage() } // 클릭 시 오늘의 퀴즈로 이동
             )
 
