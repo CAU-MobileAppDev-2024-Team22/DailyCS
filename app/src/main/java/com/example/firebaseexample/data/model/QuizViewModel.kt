@@ -1,9 +1,53 @@
+package com.example.firebaseexample.data.model
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.firebaseexample.data.repository.QuizRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class QuizViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
+
+    // 뷰모델에 결과페이지에서 전송하는 정보를 업데이트한다.
+    private val _savedResults = MutableStateFlow<List<Map<String, Any>>>(emptyList())
+    val savedResults: StateFlow<List<Map<String, Any>>> = _savedResults
+
+    fun setSavedResults(results: List<Map<String, Any>>) {
+        _savedResults.value = results
+        println("Saved results to ViewModel: $results")
+    }
+
+    // 뷰모델에 저장해둔 값을 기준으로 FireStore에서 문제 정보를 조회
+    private val repository = QuizRepository()
+
+    // 문제별 상태 관리 (문제 세부사항)
+    private val _problemDetails = mutableMapOf<String, MutableStateFlow<Map<String, Any>?>>()
+
+    // 문제별 상태 Flow 반환
+    fun getProblemDetailsFlow(quizId: String): StateFlow<Map<String, Any>?> {
+        if (!_problemDetails.containsKey(quizId)) {
+            _problemDetails[quizId] = MutableStateFlow(null) // 초기화
+        }
+        return _problemDetails[quizId]!!
+    }
+
+    // quizzes/{categoryName}/problems 하고 넘겨받은 데이터
+    fun loadProblemDetails(categoryName: String, quizId: String) {
+        repository.fetchProblemDetails(
+            categoryName = categoryName,
+            quizId = quizId,
+            onSuccess = { details ->
+                _problemDetails[quizId]?.value = details // 해당 문제 상태 업데이트
+            },
+            onError = { exception ->
+                println("Error loading problem details for $quizId: ${exception.message}")
+                _problemDetails[quizId]?.value = null
+            }
+        )
+    }
+    // 여기까지
 
     var quizzes = mutableStateOf<List<Map<String, Any>>>(emptyList())
         private set
