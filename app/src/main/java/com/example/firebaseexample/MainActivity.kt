@@ -1,8 +1,9 @@
 package com.example.firebaseexample
 
 import QuizListPage
-import QuizPage
-import QuizViewModel
+import com.example.firebaseexample.data.model.QuizViewModel
+import TodayQuizPage
+import CategoryQuizPage
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -38,9 +39,9 @@ class MainActivity : ComponentActivity() {
                     // 로그인 페이지
                     composable(route = "login") {
                         LoginPage(
-                            goToRegisterPage = { navController.navigate(route = "register") },
+                            goToRegisterPage = { navController.navigate("register") },
                             onLoginSuccess = {
-                                authViewModel.setLoggedIn(true) // 로그인 성공 처리
+                                authViewModel.setLoggedIn(true)
                                 navController.navigate("main") {
                                     popUpTo("login") { inclusive = true }
                                 }
@@ -59,12 +60,13 @@ class MainActivity : ComponentActivity() {
                     composable(route = "main") {
                         MainPage(
                             onLogout = {
-                                authViewModel.setLoggedIn(false) // 로그아웃 처리
+                                authViewModel.setLoggedIn(false)
                                 navController.navigate("login") {
                                     popUpTo("main") { inclusive = true }
                                 }
                             },
-                            goToQuizListPage = { navController.navigate(route = "quizList") }
+                            goToQuizListPage = { navController.navigate("quizList") },
+                            goToTodayQuizPage = { navController.navigate("todayQuiz") }
                         )
                     }
 
@@ -74,14 +76,15 @@ class MainActivity : ComponentActivity() {
                             onCategoryClick = { categoryId ->
                                 navController.navigate("quizPage/$categoryId")
                             },
-                            navController = navController // NavController 전달
+                            navController = navController
                         )
                     }
 
+                    // 에러 페이지
                     composable(route = "errorPage") {
                         ErrorPage(
                             onRetry = {
-                                navController.navigate("quizList") { popUpTo("quizList") { inclusive = true } }
+                                navController.navigateUp()
                             },
                             onGoToMain = {
                                 navController.navigate("main") { popUpTo("main") { inclusive = true } }
@@ -89,31 +92,49 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-
-                    // 퀴즈 페이지
+                    // 카테고리 퀴즈 페이지
                     composable(route = "quizPage/{categoryId}") { backStackEntry ->
                         val categoryId = backStackEntry.arguments?.getString("categoryId") ?: ""
-                        QuizPage(
+                        CategoryQuizPage(
                             categoryId = categoryId,
-                            onBackPressed = {
-                                navController.navigateUp() // 뒤로 가기 동작 처리
-                            },
-                            onFinishQuiz = { finalScore, totalQuestions ->
-                                quizViewModel.updateScore(finalScore, totalQuestions) // 뷰모델 업데이트
-                                navController.navigate("quizResult") {
-                                    popUpTo("quizList") { inclusive = true } // 퀴즈 목록으로 돌아갈 때 히스토리를 제거
+                            viewModel = quizViewModel,
+                            onBackPressed = { navController.navigateUp() },
+                            onFinishQuiz = { finalScore,->
+                                navController.navigate("quizResult/$finalScore/${quizViewModel.solvedQuizzesNum.value}") {
+                                    popUpTo("quizList") { inclusive = true }
                                 }
                             }
                         )
                     }
 
                     // 퀴즈 결과 페이지
-                    composable(route = "quizResult") {
+                    composable(route = "quizResult/{score}/{totalQuestions}") { backStackEntry ->
+                        val score = backStackEntry.arguments?.getString("score")?.toIntOrNull() ?: 0
+                        val totalQuestions = backStackEntry.arguments?.getString("totalQuestions")?.toIntOrNull() ?: 10
                         QuizResultPage(
-                            score = quizViewModel.score.intValue,
-                            totalQuestions = quizViewModel.totalQuestions.intValue,
-                            onRestartQuiz = { navController.navigate("quizList") },
-                            onGoToMainPage = { navController.navigate("main") }
+                            score = score,
+                            totalQuestions = totalQuestions,
+                            onRestartQuiz = { navController.navigateUp()},
+                            onGoToMainPage = { navController.navigate("main") },
+                            viewModel = quizViewModel
+                        )
+                    }
+
+                    // 오늘의 퀴즈 페이지
+                    composable(route = "todayQuiz") {
+                        TodayQuizPage(
+                            viewModel = quizViewModel,
+                            onFinishQuiz = { finalScore ->
+                                navController.navigate("quizResult/$finalScore/${quizViewModel.solvedQuizzesNum.value}") {
+                                    popUpTo("main") { inclusive = true }
+                                }
+                            },
+                            onBackPressed = { navController.navigateUp() },
+                            onTimeout = {
+                                navController.navigate("errorPage") {
+                                    popUpTo("main") { inclusive = true }
+                                }
+                            }
                         )
                     }
                 }
