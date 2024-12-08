@@ -14,6 +14,16 @@ class QuizRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
+    fun getCategoryTitle(categoryId: String, onComplete: (String?) -> Unit) {
+        db.collection("categories").document(categoryId).get()
+            .addOnSuccessListener { document ->
+                val title = document.getString("title")
+                onComplete(title)
+            }
+            .addOnFailureListener {
+                onComplete(null) // 에러 시 null 반환
+            }
+    }
     // 모든 퀴즈 카테고리 가져오기
     fun fetchAllQuizzes(
         onSuccess: (List<Pair<String, QuizCategory>>) -> Unit,

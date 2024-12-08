@@ -7,7 +7,7 @@ fun CategoryQuizPage(
     categoryId: String,
     viewModel: QuizViewModel,
     onFinishQuiz: (Int) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
         viewModel.fetchQuizzes(QuizSource.CATEGORY, categoryId)
@@ -16,6 +16,7 @@ fun CategoryQuizPage(
     QuizScreen(
         viewModel = viewModel,
         onFinishQuiz = onFinishQuiz,
-        onBackPressed = onBackPressed
+        onBackPressed = onBackPressed,
+        categoryName = categoryId
     )
 }

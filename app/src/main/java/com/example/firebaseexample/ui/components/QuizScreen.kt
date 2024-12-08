@@ -19,6 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.firebaseexample.data.repository.QuizRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -28,14 +30,17 @@ fun QuizScreen(
     viewModel: QuizViewModel,
     onFinishQuiz: (Int) -> Unit,
     onBackPressed: () -> Unit,
-    onTimeout: () -> Unit = {}
+    onTimeout: () -> Unit = {},
+    categoryName : String,
 ) {
+    val repository = QuizRepository()
     val quizzes = viewModel.quizzes.value
     val score = viewModel.score.value
     val totalQuestions = viewModel.totalQuestions.value
     var currentIndex by remember { mutableStateOf(0) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
-
+    var ans = true
+    val currentUser = FirebaseAuth.getInstance().currentUser?.uid
     if (quizzes.isEmpty()) {
         LaunchedEffect(Unit) {
             delay(3000)
@@ -71,7 +76,12 @@ fun QuizScreen(
                 if (selectedOption == currentQuiz["answer"]) {
                     viewModel.updateScore(true)
                     println("Correct!")
+                    ans = true
                 }
+                else{
+                    ans = false
+                }
+                viewModel.updateDB(categoryName,currentIndex.toString(),ans);
                 if (currentIndex < quizzes.size - 1) {
                     currentIndex++
                     selectedOption = null
@@ -79,7 +89,13 @@ fun QuizScreen(
                 } else {
                     println(viewModel.score.value)
                     onFinishQuiz(viewModel.score.value)
+                    repository.saveAllQuizResults(
+                        userId = currentUser ?: "",
+                        categoryName = categoryName,
+                        results = viewModel.getAllResults()
+                    )
                     viewModel.resetQuizState()
+
                 }
             }
         )

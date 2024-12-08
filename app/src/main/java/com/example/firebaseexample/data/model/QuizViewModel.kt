@@ -14,6 +14,20 @@ class QuizViewModel : ViewModel() {
     var totalQuestions = mutableStateOf(0)
         private set
 
+    private val quizResults = mutableListOf<Map<String, Any>>()
+
+    fun updateDB(categoryName: String, quizId: String, isCorrect: Boolean){
+        val result = mapOf(
+            "categoryName" to categoryName,
+            "quizId" to quizId,
+            "isCorrect" to isCorrect
+        )
+        quizResults.add(result)
+    }
+
+    fun getAllResults() : List<Map<String, Any>>{
+        return quizResults.toList()
+    }
     // 데이터 소스 설정 (오늘의 퀴즈 또는 카테고리별 퀴즈)
     fun fetchQuizzes(source: QuizSource, categoryId: String? = null) {
         when (source) {

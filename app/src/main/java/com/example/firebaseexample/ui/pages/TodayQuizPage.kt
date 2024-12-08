@@ -28,7 +28,8 @@ fun TodayQuizPage(
     viewModel: QuizViewModel,
     onFinishQuiz: (Int) -> Unit,
     onBackPressed: () -> Unit,
-    onTimeout: () -> Unit
+    onTimeout: () -> Unit,
+
 ) {
     val quizzes by viewModel.quizzes
 
@@ -52,6 +53,7 @@ fun TodayQuizPage(
     QuizScreen(
         viewModel = viewModel,
         onFinishQuiz = onFinishQuiz,
-        onBackPressed = onBackPressed
+        onBackPressed = onBackPressed,
+        categoryName = "오늘의 퀴즈"
     )
 }
