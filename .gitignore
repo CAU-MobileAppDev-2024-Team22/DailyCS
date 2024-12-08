@@ -31,4 +31,7 @@ replay_pid*
 .gradle/
 gradle/
 build/
+
+# Ignore local.properties
+local.properties
 # End of https://www.toptal.com/developers/gitignore/api/kotlin
