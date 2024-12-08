@@ -137,7 +137,12 @@ fun QuizResultPage(
 
             // 다시 퀴즈 풀기 버튼
             Button(
-                onClick = onRestartQuiz,
+                onClick = {
+                    viewModel.resetSavedResults()
+                    viewModel.resetProblemDetails() // 문제 상태 초기화
+                    viewModel.resetQuizResults()
+                    onRestartQuiz()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("다시 풀기")
@@ -145,7 +150,12 @@ fun QuizResultPage(
 
             // 메인 페이지로 이동 버튼
             Button(
-                onClick = onGoToMainPage,
+                onClick = {
+                    viewModel.resetSavedResults()
+                    viewModel.resetProblemDetails() // 문제 상태 초기화
+                    viewModel.resetQuizResults()
+                    onGoToMainPage()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("메인 페이지로")
