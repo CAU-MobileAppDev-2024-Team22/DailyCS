@@ -5,20 +5,28 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.firebaseexample.data.model.QuizCategory
+import com.example.firebaseexample.ui.theme.Purple40
+import com.example.firebaseexample.ui.theme.ThemeBlue
+import com.example.firebaseexample.ui.theme.ThemeGreen
+import com.example.firebaseexample.ui.theme.ThemeRed
+import com.example.firebaseexample.ui.theme.Typography
 import com.example.firebaseexample.viewmodel.QuizListViewModel
 import kotlinx.coroutines.delay
 
@@ -68,8 +76,13 @@ fun QuizListPage(
     }
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("유형별 문제 풀기", style = MaterialTheme.typography.titleLarge) },
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "유형별 문제 풀기",
+                        style = Typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                    )},
                 navigationIcon = {
                     IconButton(onClick = {
                         navController.navigate("main")
@@ -94,8 +107,8 @@ fun QuizListPage(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = 32.dp, start = 16.dp, end = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .padding(top = 8.dp, start = 16.dp, end = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         quizCategories.forEach { (categoryId, category) ->
                             item {
@@ -125,9 +138,18 @@ fun QuizCategoryCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF65558F)),
-        shape = MaterialTheme.shapes.medium
+            .clickable { onClick() }
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(12.dp),
+                clip = false
+            )
+        ,
+        colors = CardDefaults.cardColors(containerColor = Purple40),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp // 기본 그림자 크기
+        )
     ) {
         Row(
             modifier = Modifier
@@ -142,19 +164,28 @@ fun QuizCategoryCard(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = Typography.titleLarge,
                     color = Color.White
                 )
             }
 
             Column(
+                modifier = Modifier
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(50.dp)
+                    )
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = 8.dp
+                    ),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = "${score} / ${prob_num}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White,
+                    style = Typography.bodyLarge,
+                    color = ThemeRed,
                     textAlign = TextAlign.End
                 )
             }
