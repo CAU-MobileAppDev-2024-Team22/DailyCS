@@ -1,4 +1,4 @@
-import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,22 +24,30 @@ import java.util.*
 @Composable
 fun CalendarPage() {
     var calendar by remember { mutableStateOf(Calendar.getInstance()) }
-    var solvedDays by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var solvedDaysMap by remember { mutableStateOf<Map<String, Set<Int>>>(emptyMap()) }
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val today = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-
-    val daysInMonth = getDaysInMonth(year, month)
-    val firstDayOfWeek = getFirstDayOfWeek(year, month)
+    // 오늘 날짜 기준으로 이전 6개월과 이후 6개월의 날짜를 구함
+    val today = Calendar.getInstance()
+    val sixMonthsAgo = Calendar.getInstance().apply { add(Calendar.MONTH, -6) }
+    val sixMonthsLater = Calendar.getInstance().apply { add(Calendar.MONTH, 6) }
 
     // Firestore 데이터 가져오기
     fun fetchData() {
         if (userId != null) {
-            fetchSolvedDays(userId, year, month) { days ->
-                solvedDays = days
-                Log.d("SolvedDays", "Fetched solved days: $days")
+            val monthsRange = -6..6 // -6개월에서 +6개월까지
+            monthsRange.forEach { monthOffset ->
+                val calendarForMonth = Calendar.getInstance().apply {
+                    time = today.time
+                    add(Calendar.MONTH, monthOffset)
+                }
+                val year = calendarForMonth.get(Calendar.YEAR)
+                val month = calendarForMonth.get(Calendar.MONTH)
+
+                fetchSolvedDays(userId, year, month) { days ->
+                    val key = "$year-${month + 1}" // "YYYY-M" 형태의 키
+                    solvedDaysMap = solvedDaysMap + (key to days)
+                }
             }
         }
     }
@@ -60,8 +69,9 @@ fun CalendarPage() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = {
-                calendar = moveToPreviousMonth(calendar)
-                fetchData() // 이전 달로 이동 시 데이터 갱신
+                if (calendar.after(sixMonthsAgo)) {
+                    calendar = moveToPreviousMonth(calendar)
+                }
             }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -69,13 +79,14 @@ fun CalendarPage() {
                 )
             }
             Text(
-                text = "${year}.${month + 1}",
+                text = "${calendar.get(Calendar.YEAR)}.${calendar.get(Calendar.MONTH) + 1}",
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
             IconButton(onClick = {
-                calendar = moveToNextMonth(calendar)
-                fetchData() // 다음 달로 이동 시 데이터 갱신
+                if (calendar.before(sixMonthsLater)) {
+                    calendar = moveToNextMonth(calendar)
+                }
             }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
@@ -98,17 +109,16 @@ fun CalendarPage() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // 빈 칸 추가
-            items(firstDayOfWeek) {
+            items(getFirstDayOfWeek(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH))) {
                 Spacer(modifier = Modifier.size(40.dp))
             }
 
             // 날짜 배치
+            val daysInMonth = getDaysInMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH))
             items(daysInMonth.size) { index ->
                 val dayNumber = daysInMonth[index]
-                val isToday = dayNumber == today && month == Calendar.getInstance().get(Calendar.MONTH) &&
-                        year == Calendar.getInstance().get(Calendar.YEAR)
-
-                val hasSolved = solvedDays.contains(dayNumber)
+                val key = "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH) + 1}"
+                val hasSolved = solvedDaysMap[key]?.contains(dayNumber) == true
 
                 Box(
                     modifier = Modifier
@@ -116,11 +126,26 @@ fun CalendarPage() {
                         .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
+                    // 링 형태 표시
+                    if (hasSolved) {
+                        // 가운데가 비어 있는 링 그리기
+                        Canvas(modifier = Modifier.size(40.dp)) {
+                            drawArc(
+                                color = Color(0xFFFF7F00),
+                                startAngle = 0f,
+                                sweepAngle = 360f,
+                                useCenter = false,
+                                style = Stroke(width = 8f) // 링 두께 조절
+                            )
+                        }
+                    }
+                    // 날짜 텍스트
                     Text(
                         text = dayNumber.toString(),
-                        color = if (hasSolved) Color.Red else Color.Black,
+                        color = Color.Black,
                         textAlign = TextAlign.Center,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
             }
@@ -168,44 +193,11 @@ fun fetchSolvedDays(userId: String, year: Int, month: Int, onResult: (Set<Int>) 
         }
     }
 }
-
 // 날짜가 유효한지 확인하는 함수
 fun isValidDate(year: Int, month: Int, day: Int): Boolean {
     val calendar = Calendar.getInstance()
     calendar.set(year, month, day)
     return calendar.get(Calendar.MONTH) == month && calendar.get(Calendar.DAY_OF_MONTH) == day
-}
-
-suspend fun fetchSolvedCounts(userId: String, year: Int, month: Int, onResult: (Map<Int, Int>) -> Unit) {
-    val db: FirebaseFirestore = Firebase.firestore
-    val counts = mutableMapOf<Int, Int>()
-
-    val startDate = Calendar.getInstance().apply {
-        set(year, month, 1)
-    }.time
-
-    val endDate = Calendar.getInstance().apply {
-        set(year, month + 1, 1)
-        add(Calendar.DAY_OF_MONTH, -1)
-    }.time
-
-    db.collection("users").document(userId)
-        .collection("date")
-        .whereGreaterThan("date", startDate)
-        .whereLessThan("date", endDate)
-        .get()
-        .addOnSuccessListener { documents ->
-            for (document in documents) {
-                val day = document.getDate("date")?.let { date ->
-                    Calendar.getInstance().apply { time = date }.get(Calendar.DAY_OF_MONTH)
-                }
-                val solvedMap = document.get("solved") as? Map<*, *>
-                if (day != null && solvedMap != null) {
-                    counts[day] = solvedMap.size
-                }
-            }
-            onResult(counts)
-        }
 }
 
 
