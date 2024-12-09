@@ -63,6 +63,6 @@ fun BrushupQuizPage(
         viewModel = viewModel,
         onFinishQuiz = onFinishQuiz,
         onBackPressed = onBackPressed,
-        categoryName = "복습 추천 문제"
+        categoryName = viewModel.brushUpCategory.value
     )
 }
