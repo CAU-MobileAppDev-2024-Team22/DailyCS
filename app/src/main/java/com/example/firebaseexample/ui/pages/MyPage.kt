@@ -149,7 +149,7 @@ fun SolvedByCategorySection(solvedCounts: List<Pair<String,QuizCategory>>, quizV
                 )
                 LinearProgressIndicator(
                     progress = {
-                        (solvedCount / categorySize).toFloat() // 최대 35문제로 가정
+                        (solvedCount.toFloat() / categorySize.toFloat()) // 최대 35문제로 가정
                     },
                     modifier = Modifier
                         .weight(2.5f)

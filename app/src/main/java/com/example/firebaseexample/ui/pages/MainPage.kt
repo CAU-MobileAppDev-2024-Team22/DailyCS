@@ -84,12 +84,12 @@ fun MainPage(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { goToMyPage() }) { // 아이콘 클릭 시 MyPage로 이동
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile"
-                        )
-                    }
+//                    IconButton(onClick = { goToMyPage() }) { // 아이콘 클릭 시 MyPage로 이동
+//                        Icon(
+//                            imageVector = Icons.Default.Person,
+//                            contentDescription = "Profile"
+//                        )
+//                    }
                     IconButton(onClick = { onLogout() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
