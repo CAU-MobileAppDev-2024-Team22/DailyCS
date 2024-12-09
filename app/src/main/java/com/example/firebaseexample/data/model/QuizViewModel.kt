@@ -21,7 +21,6 @@ class QuizViewModel : ViewModel() {
     val savedResults: StateFlow<List<Map<String, Any>>> = _savedResults
 
     fun setSavedResults(results: List<Map<String, Any>>) {
-        println("이미 저장되어 있다고?: ${_savedResults.value}")
         _savedResults.value = results
         println("Saved results to ViewModel: $results")
     }
@@ -108,13 +107,15 @@ class QuizViewModel : ViewModel() {
         }
     }
 
-    fun updateDB(categoryName: String, quizId: String, isCorrect: Boolean){
+    fun updateDB(categoryName: String, quizId: String, isCorrect: Boolean) {
+        val randomQuiz = quizzes.value.find { it["quizId"] == quizId } ?: emptyMap<String, Any>()
         val result = mapOf(
             "categoryName" to categoryName,
-            "quizId" to quizId,
+            "quizId" to randomQuiz["quizId"].toString(), // 랜덤하게 재설정된 ID 사용
             "isCorrect" to isCorrect
         )
         quizResults.add(result)
+        println("Updated DB with Result: $result")
     }
 
     fun getAllResults() : List<Map<String, Any>>{
@@ -128,20 +129,6 @@ class QuizViewModel : ViewModel() {
             QuizSource.BRUSHUP -> fetchRandomQuizzes(categoryId ?: "", quizNum = 5)
         }
     }
-
-    /*
-    private fun fetchTodayQuizzes() {
-        val today = getCurrentDate()
-        println(today)
-        db.collection("todayQuiz").document(today).get()
-            .addOnSuccessListener { document ->
-                val fetchedQuizzes = document.get("problems") as? List<Map<String, Any>> ?: emptyList()
-                println(fetchedQuizzes)
-                quizzes.value = fetchedQuizzes
-                totalQuestions.value = fetchedQuizzes.size
-            }
-    }
-    */
 
     fun fetchTodayCategory() {
         val today = getCurrentDate()
@@ -201,22 +188,20 @@ class QuizViewModel : ViewModel() {
                     val fetchedQuizzes = document.get("problems") as? List<Map<String, Any>> ?: emptyList()
                     println("Fetched Quizzes for Random: $fetchedQuizzes")
 
-                    // `fetchedQuizzes`와 원래 인덱스를 함께 보관
+                    // 각 퀴즈에 원본 인덱스 추가
                     val indexedQuizzes = fetchedQuizzes.mapIndexed { index, quiz ->
-                        index to quiz
+                        quiz.toMutableMap().apply {
+                            put("quizId", index.toString()) // 랜덤 ID를 설정
+                        }
                     }
 
-                    // 랜덤으로 선택 (인덱스와 데이터를 포함)
-                    val randomQuizzesWithIndices = indexedQuizzes.shuffled().take(quizNum)
-                    println("Random Quizzes with Indices: $randomQuizzesWithIndices")
+                    // 랜덤으로 선택
+                    val randomQuizzes = indexedQuizzes.shuffled().take(quizNum)
+                    println("Random Quizzes with Updated IDs: $randomQuizzes")
 
-                    // 상태 업데이트 (퀴즈 데이터와 인덱스 포함)
-                    quizzes.value = randomQuizzesWithIndices.map { it.second }
-                    totalQuestions.value = randomQuizzesWithIndices.size
-
-                    // 랜덤으로 선택된 퀴즈의 인덱스 출력 (필요할 경우 상태로 보관 가능)
-                    val selectedIndices = randomQuizzesWithIndices.map { it.first }
-                    println("Selected Indices: $selectedIndices")
+                    // 상태 업데이트
+                    quizzes.value = randomQuizzes
+                    totalQuestions.value = randomQuizzes.size
                 } else {
                     println("Document does not exist.")
                 }
