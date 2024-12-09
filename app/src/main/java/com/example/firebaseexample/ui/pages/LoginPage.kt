@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -57,6 +58,8 @@ fun LoginPage(
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isLoading by rememberSaveable { mutableStateOf(false) }
+    var errorMessage by rememberSaveable { mutableStateOf("") } // 에러 메시지 관리
+    var showErrorDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier
@@ -145,12 +148,17 @@ fun LoginPage(
                         contentColor = Color.White
                     ),
                     onClick = {
-                        isLoading = true // 로딩 상태 시작
+                        isLoading = true
                         loginUser(
                             email,
                             password,
+                            onLoginFailure = { error ->
+                                isLoading = false
+                                errorMessage = error // 에러 메시지 설정
+                                showErrorDialog = true // 팝업창 표시
+                            },
                             onLoginSuccess = {
-                                isLoading = false // 로딩 상태 종료
+                                isLoading = false
                                 onLoginSuccess(it)
                             },
                             nickNameViewModel = nickNameViewModel
@@ -198,12 +206,32 @@ fun LoginPage(
                 }
             }
         }
+        // 에러 팝업
+        if (showErrorDialog) {
+            AlertDialog(
+                onDismissRequest = { showErrorDialog = false },
+                confirmButton = {
+                    Button(
+                        onClick = { showErrorDialog = false },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ThemeBlue, // 배경 색상
+                            contentColor = Color.White // 텍스트 색상
+                        )) {
+                        Text(text = "확인",
+                            style = Typography.bodySmall)
+                    }
+                },
+                title = { Text("로그인 실패") },
+                text = { Text("등록되지 않은 회원입니다.") }
+            )
+        }
     }
 }
 
 fun loginUser(
     email: String,
     password: String,
+    onLoginFailure: (String) -> Unit,
     onLoginSuccess: (Boolean) -> Unit, // 닉네임 존재 여부를 콜백으로 전달
     nickNameViewModel: NickNameViewModel
 ) {
@@ -229,16 +257,14 @@ fun loginUser(
                             }
                         },
                         onError = { exception ->
-                            println("닉네임 가져오기 실패: ${exception.message}")
-                            onLoginSuccess(false) // 에러 시 닉네임 없음 처리
+                            onLoginFailure("닉네임을 불러오지 못했습니다.")
                         }
                     )
                 } else {
-                    println("사용자 ID를 찾을 수 없습니다.")
-                    onLoginSuccess(false) // 사용자 ID 없음 -> 닉네임 없음 처리
+                    onLoginFailure("사용자 ID를 찾을 수 없습니다.") // 사용자 ID 없음
                 }
             } else {
-                println("로그인 실패: ${task.exception?.message}")
+                onLoginFailure(task.exception?.message ?: "로그인 실패") // 실패 메시지 전달
             }
         }
 }
