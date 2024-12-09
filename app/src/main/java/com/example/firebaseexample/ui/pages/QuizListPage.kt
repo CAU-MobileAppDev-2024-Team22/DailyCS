@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.firebaseexample.data.model.QuizCategory
+import com.example.firebaseexample.data.model.QuizViewModel
 import com.example.firebaseexample.ui.theme.Purple40
 import com.example.firebaseexample.ui.theme.ThemeBlue
 import com.example.firebaseexample.ui.theme.ThemeGreen
@@ -38,6 +39,7 @@ fun QuizListPage(
     navController: NavController // NavController 추가
 ) {
     val viewModel: QuizListViewModel = viewModel()
+    val quizViewModel: QuizViewModel = viewModel()
     val quizCategories by viewModel.quizCategories.collectAsState()
 
     // 로딩 상태를 확인하기 위한 추가 플래그
@@ -65,6 +67,7 @@ fun QuizListPage(
             }
         }
 
+        quizViewModel.checkSolvedAnswers()
 //        delay(3000) // 3초 대기
 //        if (quizCategories.isEmpty()) {
 //            isLoading = false
@@ -110,11 +113,14 @@ fun QuizListPage(
                             .padding(top = 8.dp, start = 16.dp, end = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+
                         quizCategories.forEach { (categoryId, category) ->
+                            val solvedCount = quizViewModel.solvedCounts.value[categoryId] ?:0
+
                             item {
                                 QuizCategoryCard(
                                     title = category.title,
-                                    score = category.problems.size, // 푼 문제로 수정 필요
+                                    score = solvedCount, // 푼 문제로 수정 필요
                                     prob_num = category.problems.size,
                                     onClick = { onCategoryClick(categoryId) }
                                 )

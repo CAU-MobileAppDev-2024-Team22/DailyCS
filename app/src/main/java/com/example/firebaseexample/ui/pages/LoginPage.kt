@@ -36,18 +36,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.firebaseexample.data.repository.QuizRepository
 import com.example.firebaseexample.ui.theme.LineColor
 import com.example.firebaseexample.ui.theme.TextFieldBorder
 import com.example.firebaseexample.ui.theme.ThemeBlue
 import com.example.firebaseexample.ui.theme.ThemeGray
 import com.example.firebaseexample.ui.theme.Typography
+import com.example.firebaseexample.viewmodel.NickNameViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginPage(
     goToRegisterPage: () -> Unit,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    nickNameViewModel: NickNameViewModel
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -79,11 +83,12 @@ fun LoginPage(
             Text(
                 text = "매일CS",
                 fontWeight = FontWeight.Bold,
-                style = Typography.titleLarge
+                style = Typography.titleLarge.copy(fontSize = 28.sp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "매일 늘려가는 CS 지식 한 걸음",
+                style = Typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -134,7 +139,7 @@ fun LoginPage(
                     contentColor = Color.White
                 ),
                 onClick = {
-                    loginUser(email, password, onLoginSuccess)
+                    loginUser(email, password, onLoginSuccess, nickNameViewModel)
                 }
             ) {
                 Text(
@@ -180,13 +185,35 @@ fun LoginPage(
     }
 }
 
-fun loginUser(email: String, password: String, onLoginSuccess: () -> Unit) {
+fun loginUser(email: String, password: String, onLoginSuccess: () -> Unit, nickNameViewModel: NickNameViewModel) {
     val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
+    val quizRepository = QuizRepository()
 
     auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                onLoginSuccess()
+                if (userId != null) {
+                    // 로그인 성공 시 닉네임 가져오기
+                    quizRepository.fetchNickname(
+                        userId = userId,
+                        onSuccess = { nickname ->
+                            if (nickname != null) {
+                                nickNameViewModel.setNickname(nickname) // 닉네임을 뷰모델에 저장
+                                println("로그인 성공: 닉네임 [$nickname] 저장 완료")
+                            } else {
+                                println("닉네임이 설정되지 않았습니다.")
+                            }
+                            onLoginSuccess() // 로그인 성공 콜백 실행
+                        },
+                        onError = { exception ->
+                            println("닉네임 가져오기 실패: ${exception.message}")
+                        }
+                    )
+                } else {
+                    println("사용자 ID를 찾을 수 없습니다.")
+                }
             }
         }
 }
+

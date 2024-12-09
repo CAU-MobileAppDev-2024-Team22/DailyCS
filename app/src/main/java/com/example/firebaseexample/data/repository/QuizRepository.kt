@@ -5,6 +5,7 @@ import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.firebaseexample.data.model.QuizCategory
+import com.example.firebaseexample.viewmodel.NickNameViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
@@ -139,6 +140,45 @@ class QuizRepository {
         saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = true)  // 날짜별 오답 저장
     }
 
+    suspend fun checkSolvedAnswers(
+        viewModel: QuizViewModel
+    ) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val subjects = listOf("운영체제", "네트워크", "컴퓨터구조", "자료구조", "알고리즘", "데이터베이스")
+
+        // 각 카테고리별 푼 문제 수를 저장할 맵
+        val solvedCounts = mutableMapOf<String, Int>()
+
+        println("User ID: $userId")
+        for (subject in subjects) {
+            val categoryDocument = userId?.let {
+                db.collection("users")
+                    .document(it)
+                    .collection("solved")
+                    .document(subject)
+                    .get()
+                    .await() // 비동기 호출
+            }
+
+            if (categoryDocument != null) {
+                if (categoryDocument.exists()) {
+                    // 필드 수를 세기
+                    val solvedAnswersCount = categoryDocument.data?.size ?: 0
+
+                    // 카테고리와 푼 문제 수 저장
+                    solvedCounts[subject] = solvedAnswersCount
+                    println("Total solved answers for $subject: $solvedAnswersCount")
+                } else {
+                    println("Document for '$subject' does not exist.")
+                }
+            }
+        }
+
+        // 뷰모델에 카테고리별 푼 문제 수 저장
+        viewModel.solvedCounts.value = solvedCounts // 뷰모델에 저장
+        println("Solved counts per category: $solvedCounts")
+    }
+
     suspend fun checkWrongAnswers(
         viewModel: QuizViewModel
     ): Boolean {
@@ -159,20 +199,14 @@ class QuizRepository {
 
             if (documentSnapshot != null) {
                 if (documentSnapshot.exists()) {
-                    val wrongAnswers = documentSnapshot.data?.values?.sumOf { map ->
-                        if (map is Map<*, *>) {
-                            // 맵의 개수 반환
-                            map.size
-                        } else {
-                            0
-                        }
-                    } ?: 0
+                    val wrongAnswers = documentSnapshot.data?.size ?: 0
+
                     if(maxWrongCategory < wrongAnswers){
                         maxWrongCategory = wrongAnswers
                         viewModel.brushUpCategory.value = subject
                     }
                     totalWrongAnswers += wrongAnswers
-                    println("total: $totalWrongAnswers")
+                    println("total wrong: $totalWrongAnswers")
                 } else {
                     println("문서 '$subject'가 존재하지 않습니다.")
                 }
@@ -181,7 +215,7 @@ class QuizRepository {
         }
         println(viewModel.brushUpCategory.value)
         println(maxWrongCategory)
-        return totalWrongAnswers >= 15 // 5*3 이상인지 여부 반환
+        return totalWrongAnswers >= 5 // wrong 문제가 5개 이상인지 여부 반환
     }
 
     // FireStore 에서 quizzes/{categoryName}/problems 까지 불러옴
@@ -208,4 +242,48 @@ class QuizRepository {
             }
     }
 
+    // 닉네임 설정 후 닉네임 저장 로직
+    fun saveNickname(
+        userId: String,
+        nickname: String,
+        nickNameViewModel: NickNameViewModel,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val userRef = db.collection("users").document(userId)
+
+        // 닉네임을 Firestore에 저장
+        userRef.set(
+            mapOf("nickname" to nickname),
+            SetOptions.merge() // 기존 데이터와 병합
+        ).addOnSuccessListener {
+            println("Nickname saved successfully!")
+            // Firestore 저장 성공 시 뷰모델에 닉네임 업데이트
+            nickNameViewModel.setNickname(nickname)
+            onSuccess()
+        }.addOnFailureListener { exception ->
+            println("Error saving nickname: ${exception.message}")
+            onError(exception)
+        }
+    }
+
+    // 로그인 시 닉네임 불러오기
+    fun fetchNickname(
+        userId: String,
+        onSuccess: (String?) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val nickname = document.getString("nickname")
+                    onSuccess(nickname) // 닉네임 반환
+                } else {
+                    onSuccess(null) // 닉네임이 없으면 null 반환
+                }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception) // 에러 처리
+            }
+    }
 }

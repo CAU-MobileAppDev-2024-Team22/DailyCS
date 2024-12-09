@@ -3,6 +3,7 @@ package com.example.firebaseexample.data.model
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firebaseexample.data.repository.QuizRepository
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -90,11 +91,20 @@ class QuizViewModel : ViewModel() {
     var todayCategory = mutableStateOf("")
         private set
 
+    var solvedCounts = mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+  
     private val quizResults = mutableListOf<Map<String, Any>>()
 
     fun checkWrongAnswers() {
         viewModelScope.launch {
             isButtonEnabled.value = repository.checkWrongAnswers(this@QuizViewModel)
+        }
+    }
+
+    fun checkSolvedAnswers() {
+        viewModelScope.launch {
+            repository.checkSolvedAnswers(this@QuizViewModel)
         }
     }
 
