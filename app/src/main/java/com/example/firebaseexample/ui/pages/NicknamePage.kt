@@ -41,12 +41,14 @@ import com.example.firebaseexample.ui.theme.TextFieldBorder
 import com.example.firebaseexample.ui.theme.ThemeBlue
 import com.example.firebaseexample.ui.theme.ThemeGray
 import com.example.firebaseexample.ui.theme.Typography
+import com.example.firebaseexample.viewmodel.NickNameViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NicknamePage(
     backToMainPage: () -> Unit,
+    nicknameViewModel: NickNameViewModel,
     onNicknameRegistered: () -> Unit // 닉네임 등록 후 콜백
 ) {
     val repository = QuizRepository()
@@ -119,6 +121,7 @@ fun NicknamePage(
                         repository.saveNickname(
                             userId = userId,
                             nickname = nickname,
+                            nickNameViewModel = nicknameViewModel, // 뷰모델 전달
                             onSuccess = {
                                 println("닉네임 등록 성공")
                                 onNicknameRegistered() // 닉네임 등록 후 콜백 호출
