@@ -19,7 +19,7 @@ val inter = FontFamily(
 )
 
 // Set of Material typography styles to start with
-val Typography = Typography(
+val Typo2 = Typography(
     titleLarge = TextStyle(
         fontFamily = inter,
         fontWeight = FontWeight.SemiBold,
@@ -66,4 +66,42 @@ val Typography = Typography(
         letterSpacing = 0.5.sp
     )
     */
+)
+
+val baloo2 = FontFamily(
+    Font(R.font.galmuri11_bold, FontWeight.Bold, FontStyle.Normal),
+    Font(R.font.galmuri11, FontWeight.Normal, FontStyle.Normal),
+)
+
+val Typography = Typography(
+    titleLarge = TextStyle(
+        fontFamily = baloo2,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        letterSpacing = 0.5.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = baloo2,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        letterSpacing = 0.3.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = baloo2,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        letterSpacing = 0.5.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = baloo2,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        letterSpacing = 0.5.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = baloo2,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        letterSpacing = 0.5.sp
+    )
 )

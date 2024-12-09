@@ -120,7 +120,8 @@ class MainActivity : ComponentActivity() {
                             totalQuestions = totalQuestions,
                             onRestartQuiz = { navController.navigateUp()},
                             onGoToMainPage = { navController.navigate("main") },
-                            viewModel = quizViewModel
+                            viewModel = quizViewModel,
+                            navController = navController
                         )
                     }
 

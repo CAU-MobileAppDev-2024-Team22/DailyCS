@@ -37,9 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firebaseexample.data.model.QuizViewModel
 import com.example.firebaseexample.ui.components.BottomNavigationBar
-import com.example.firebaseexample.ui.components.QuizCard
+import com.example.firebaseexample.ui.theme.ThemeDarkGreen
 import com.example.firebaseexample.ui.theme.Typography
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +95,7 @@ fun MainPage(
                 subtitle = "10문제",
                 tag = "운영체제",
                 time = "3 min",
-                backgroundColor = Color(0xFF3D8A74),
+                backgroundColor = ThemeDarkGreen,
                 onClick = { goToTodayQuizPage() } // 클릭 시 오늘의 퀴즈로 이동
             )
 
@@ -237,7 +236,6 @@ fun ButtonCard(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
-                modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
     }

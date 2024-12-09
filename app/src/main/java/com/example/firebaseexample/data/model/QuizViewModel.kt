@@ -20,6 +20,7 @@ class QuizViewModel : ViewModel() {
     val savedResults: StateFlow<List<Map<String, Any>>> = _savedResults
 
     fun setSavedResults(results: List<Map<String, Any>>) {
+        println("이미 저장되어 있다고?: ${_savedResults.value}")
         _savedResults.value = results
         println("Saved results to ViewModel: $results")
     }
@@ -52,6 +53,20 @@ class QuizViewModel : ViewModel() {
             }
         )
     }
+
+    fun resetSavedResults() {
+        _savedResults.value = emptyList() // 저장된 결과 초기화
+        println("Saved results cleared: ${_savedResults.value}")
+    }
+
+    fun resetProblemDetails() {
+        _problemDetails.clear() // 문제 상태 초기화
+    }
+
+    fun resetQuizResults() {
+        quizResults.clear() // 문제 상태 초기화
+    }
+
     // 여기까지
 
     var quizzes = mutableStateOf<List<Map<String, Any>>>(emptyList())
