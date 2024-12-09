@@ -57,6 +57,7 @@ fun MainPage(
     // 틀린 문제 수 체크
     LaunchedEffect(Unit) {
         viewModel.checkWrongAnswers()
+        viewModel.fetchTodayCategory()
     }
     Scaffold(
         topBar = {
@@ -104,7 +105,7 @@ fun MainPage(
             QuizCard(
                 title = "오늘의 퀴즈",
                 subtitle = "10문제",
-                tag = "운영체제",
+                tag = viewModel.todayCategory.value,
                 time = "3 min",
                 backgroundColor = ThemeDarkGreen,
                 onClick = { goToTodayQuizPage() } // 클릭 시 오늘의 퀴즈로 이동
@@ -116,7 +117,7 @@ fun MainPage(
             QuizCard(
                 title = if (viewModel.isButtonEnabled.value) "복습 추천 문제" else "복습 추천 문제(비활성화)",
                 subtitle = "5문제",
-                tag = "알고리즘",
+                tag = viewModel.brushUpCategory.value,
                 time = "2 min",
                 backgroundColor = Color(0xFF5D5D5D),
                 onClick = {

@@ -93,7 +93,7 @@ class QuizViewModel : ViewModel() {
 
     var solvedCounts = mutableStateOf<Map<String, Int>>(emptyMap())
         private set
-
+  
     private val quizResults = mutableListOf<Map<String, Any>>()
 
     fun checkWrongAnswers() {
@@ -123,12 +123,13 @@ class QuizViewModel : ViewModel() {
     // 데이터 소스 설정 (오늘의 퀴즈 또는 카테고리별 퀴즈)
     fun fetchQuizzes(source: QuizSource, categoryId: String? = null) {
         when (source) {
-            QuizSource.TODAY -> fetchTodayQuizzes()
+            QuizSource.TODAY -> fetchRandomQuizzes(categoryId ?: "", quizNum = 10)
             QuizSource.CATEGORY -> fetchCategoryQuizzes(categoryId ?: "")
-            QuizSource.BRUSHUP -> fetchRandomQuizzes(categoryId ?: "")
+            QuizSource.BRUSHUP -> fetchRandomQuizzes(categoryId ?: "", quizNum = 5)
         }
     }
 
+    /*
     private fun fetchTodayQuizzes() {
         val today = getCurrentDate()
         println(today)
@@ -138,6 +139,35 @@ class QuizViewModel : ViewModel() {
                 println(fetchedQuizzes)
                 quizzes.value = fetchedQuizzes
                 totalQuestions.value = fetchedQuizzes.size
+            }
+    }
+    */
+
+    fun fetchTodayCategory() {
+        val today = getCurrentDate()
+        println("Fetching today's quizzes for date: $today")
+        db.collection("todayQuiz").document(today).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // `problems` 배열 필드와 카테고리 가져오기
+                    val fetchedQuizzes = document.get("problems") as? List<Map<String, Any>> ?: emptyList()
+                    val categoryId = document.getString("category") // 카테고리 가져오기
+                    println("Fetched Quizzes: $fetchedQuizzes")
+                    quizzes.value = fetchedQuizzes
+                    totalQuestions.value = fetchedQuizzes.size
+
+                    // 카테고리가 null이 아니면 랜덤 문제 가져오기
+                    if (categoryId != null) {
+                        todayCategory.value = categoryId
+                    } else {
+                        println("Category ID is null.")
+                    }
+                } else {
+                    println("Document does not exist.")
+                }
+            }
+            .addOnFailureListener { exception ->
+                println("Error fetching today's quizzes: ${exception.message}")
             }
     }
 
@@ -162,7 +192,7 @@ class QuizViewModel : ViewModel() {
             }
     }
 
-    fun fetchRandomQuizzes(categoryId: String) {
+    fun fetchRandomQuizzes(categoryId: String, quizNum: Int) {
         println("Category ID for Random: $categoryId")
         db.collection("quizzes").document(categoryId).get()
             .addOnSuccessListener { document ->
@@ -172,7 +202,7 @@ class QuizViewModel : ViewModel() {
                     println("Fetched Quizzes for Random: $fetchedQuizzes")
 
                     // 랜덤으로 5개 선택
-                    val randomQuizzes = fetchedQuizzes.shuffled().take(5)
+                    val randomQuizzes = fetchedQuizzes.shuffled().take(quizNum)
                     println("Random Quizzes: $randomQuizzes")
 
                     // 상태 업데이트
