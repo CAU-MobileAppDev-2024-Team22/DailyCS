@@ -19,8 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.firebaseexample.data.model.QuizViewModel
 import com.example.firebaseexample.data.repository.QuizRepository
 import com.example.firebaseexample.ui.components.BottomNavigationBar
@@ -53,7 +56,8 @@ fun MainPage(
     goToQuizListPage: () -> Unit,
     goToTodayQuizPage: () -> Unit, // 오늘의 퀴즈 페이지로 이동하는 콜백
     goToBrushQuizPage: () -> Unit, // 복습 추천 문제 페이지로 이동하는 콜백
-    goToNicknamePage: () -> Unit // 닉네임 페이지로 이동하는 콜백
+    goToNicknamePage: () -> Unit, // 닉네임 페이지로 이동하는 콜백
+    navController: NavController
 ) {
     var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
     val quizRepository = QuizRepository()
@@ -69,6 +73,7 @@ fun MainPage(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.padding(horizontal = 12.dp), // 좌우 패딩 설정
                 title = {
                     nickname?.let {
                         Text(
@@ -79,16 +84,22 @@ fun MainPage(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
+                    IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.Default.Person,
+                            contentDescription = "Profile"
+                        )
+                    }
+                    IconButton(onClick = { onLogout() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Profile"
                         )
                     }
                 }
             )
         },
-        bottomBar = { BottomNavigationBar() }
+        bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
         Column(
             modifier = Modifier

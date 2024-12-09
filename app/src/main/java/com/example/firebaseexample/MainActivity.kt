@@ -43,13 +43,19 @@ class MainActivity : ComponentActivity() {
                     composable(route = "login") {
                         LoginPage(
                             goToRegisterPage = { navController.navigate("register") },
-                            onLoginSuccess = {
+                            onLoginSuccess = { hasNickname ->
                                 authViewModel.setLoggedIn(true)
-                                navController.navigate("main") {
-                                    popUpTo("login") { inclusive = true }
+                                if (hasNickname) {
+                                    navController.navigate("main") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("nickname") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             },
-                            nickNameViewModel = nickNameViewModel,
+                            nickNameViewModel = nickNameViewModel
                         )
                     }
 
@@ -83,7 +89,8 @@ class MainActivity : ComponentActivity() {
                             goToQuizListPage = { navController.navigate("quizList") },
                             goToTodayQuizPage = { navController.navigate("todayQuiz") },
                             goToBrushQuizPage = { navController.navigate("brushupQuiz")},
-                            goToNicknamePage = { navController.navigate("nickname") }
+                            goToNicknamePage = { navController.navigate("nickname") },
+                            navController = navController
                         )
                     }
 
