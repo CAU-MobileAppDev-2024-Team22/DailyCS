@@ -9,14 +9,17 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import com.example.firebaseexample.ui.theme.Typography
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     NavigationBar {
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            label = { Text("Home") },
+            label = { Text("Home",
+                style = Typography.bodySmall.copy(fontWeight = FontWeight.Bold)) },
             selected = false,
             onClick = {
                 navController.navigate("main") {
@@ -24,15 +27,16 @@ fun BottomNavigationBar(navController: NavController) {
                 }
             }
         )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Analytics, contentDescription = "Analytics") },
-            label = { Text("Analytics") },
-            selected = false,
-            onClick = { /* Analytics 클릭 이벤트 */ }
-        )
+//        NavigationBarItem(
+//            icon = { Icon(Icons.Default.Analytics, contentDescription = "Analytics") },
+//            label = { Text("Analytics") },
+//            selected = false,
+//            onClick = { /* Analytics 클릭 이벤트 */ }
+//        )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-            label = { Text("Profile") },
+            label = { Text("Profile",
+                style = Typography.bodySmall.copy(fontWeight = FontWeight.Bold)) },
             selected = false,
             onClick = { /* Profile 클릭 이벤트 */ }
         )
