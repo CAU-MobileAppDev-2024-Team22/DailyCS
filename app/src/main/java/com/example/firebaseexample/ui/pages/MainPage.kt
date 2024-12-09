@@ -19,11 +19,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.firebaseexample.data.model.QuizViewModel
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.theme.ThemeDarkGreen
 import com.example.firebaseexample.ui.theme.Typography
@@ -31,10 +43,17 @@ import com.example.firebaseexample.ui.theme.Typography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainPage(
+    viewModel: QuizViewModel,
     onLogout: () -> Unit,
     goToQuizListPage: () -> Unit,
-    goToTodayQuizPage: () -> Unit // 오늘의 퀴즈 페이지로 이동하는 콜백
+    goToTodayQuizPage: () -> Unit, // 오늘의 퀴즈 페이지로 이동하는 콜백
+    goToBrushQuizPage: () -> Unit // 복습 추천 문제 페이지로 이동하는 콜백
 ) {
+    var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
+// 틀린 문제 수 체크
+    LaunchedEffect(Unit) {
+        viewModel.checkWrongAnswers()
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,12 +103,18 @@ fun MainPage(
 
             // 복습 추천 문제 카드
             QuizCard(
-                title = "복습 추천 문제",
+                title = if (viewModel.isButtonEnabled.value) "복습 추천 문제" else "복습 추천 문제(비활성화)",
                 subtitle = "5문제",
                 tag = "알고리즘",
                 time = "2 min",
                 backgroundColor = Color(0xFF5D5D5D),
-                onClick = { /* 다른 작업 추가 가능 */ }
+                onClick = {
+                    if (viewModel.isButtonEnabled.value) {
+                        goToBrushQuizPage()
+                    } else {
+                        showDialog = true // 팝업창 띄우기
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -101,8 +126,23 @@ fun MainPage(
                 onClick = { goToQuizListPage() } // 클릭 시 카테고리 퀴즈로 이동
             )
         }
+
+        // 경고 팝업
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    Button(onClick = { showDialog = false }) {
+                        Text("확인")
+                    }
+                },
+                title = { Text("알림") },
+                text = { Text("복습 추천 문제를 활성화하려면 조건을 충족해야 합니다.") }
+            )
+        }
     }
 }
+
 
 @Composable
 fun QuizCard(
@@ -200,4 +240,5 @@ fun ButtonCard(
         }
     }
 }
+
 
