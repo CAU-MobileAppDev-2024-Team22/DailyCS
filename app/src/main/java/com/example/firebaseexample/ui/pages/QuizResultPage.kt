@@ -157,6 +157,7 @@ fun QuizResultPage(
                                         .fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
+
                                     Text(
                                         text = "${problemDetails!!["question"] ?: "질문 없음"}",
                                         style = MaterialTheme.typography.titleMedium,
@@ -164,7 +165,8 @@ fun QuizResultPage(
                                     )
                                     Column(
                                         modifier = Modifier.fillMaxWidth(),
-                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         val correctAnswer = problemDetails!!["answer"] as? String
 
@@ -191,6 +193,11 @@ fun QuizResultPage(
                                                 }
                                             }
                                         }
+                                        Text(
+                                            text = "[해설] ${problemDetails!!["comment"] ?: "해설 없음"}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp)
+                                        )
                                     }
                                 }
                             } else {
