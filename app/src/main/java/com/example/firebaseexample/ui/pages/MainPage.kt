@@ -29,6 +29,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,25 +40,35 @@ import com.example.firebaseexample.data.model.QuizViewModel
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.theme.ThemeDarkGreen
 import com.example.firebaseexample.ui.theme.Typography
+import com.example.firebaseexample.viewmodel.NickNameViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainPage(
     viewModel: QuizViewModel,
+    nicknameViewModel: NickNameViewModel,
     onLogout: () -> Unit,
     goToQuizListPage: () -> Unit,
     goToTodayQuizPage: () -> Unit, // 오늘의 퀴즈 페이지로 이동하는 콜백
     goToBrushQuizPage: () -> Unit // 복습 추천 문제 페이지로 이동하는 콜백
 ) {
     var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
-// 틀린 문제 수 체크
+    val nickname by nicknameViewModel.nickname.collectAsState(initial = "닉네임 없음")
+    // 틀린 문제 수 체크
     LaunchedEffect(Unit) {
         viewModel.checkWrongAnswers()
     }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "푸앙", style = Typography.titleLarge) },
+                title = {
+                    nickname?.let {
+                        Text(
+                            text = it, // 닉네임 출력
+                            style = Typography.titleLarge
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
                         Icon(

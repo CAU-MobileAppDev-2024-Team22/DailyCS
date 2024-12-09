@@ -5,6 +5,7 @@ import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.firebaseexample.data.model.QuizCategory
+import com.example.firebaseexample.viewmodel.NickNameViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
@@ -241,4 +242,48 @@ class QuizRepository {
             }
     }
 
+    // 닉네임 설정 후 닉네임 저장 로직
+    fun saveNickname(
+        userId: String,
+        nickname: String,
+        nickNameViewModel: NickNameViewModel,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val userRef = db.collection("users").document(userId)
+
+        // 닉네임을 Firestore에 저장
+        userRef.set(
+            mapOf("nickname" to nickname),
+            SetOptions.merge() // 기존 데이터와 병합
+        ).addOnSuccessListener {
+            println("Nickname saved successfully!")
+            // Firestore 저장 성공 시 뷰모델에 닉네임 업데이트
+            nickNameViewModel.setNickname(nickname)
+            onSuccess()
+        }.addOnFailureListener { exception ->
+            println("Error saving nickname: ${exception.message}")
+            onError(exception)
+        }
+    }
+
+    // 로그인 시 닉네임 불러오기
+    fun fetchNickname(
+        userId: String,
+        onSuccess: (String?) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val nickname = document.getString("nickname")
+                    onSuccess(nickname) // 닉네임 반환
+                } else {
+                    onSuccess(null) // 닉네임이 없으면 null 반환
+                }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception) // 에러 처리
+            }
+    }
 }

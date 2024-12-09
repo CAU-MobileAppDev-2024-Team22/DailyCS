@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.firebaseexample.ui.pages.*
 import com.example.firebaseexample.ui.theme.FirebaseExampleTheme
 import com.example.firebaseexample.viewmodel.AuthViewModel
+import com.example.firebaseexample.viewmodel.NickNameViewModel
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
                 val isLoggedIn = authViewModel.isLoggedIn
 
                 val quizViewModel: QuizViewModel = viewModel()
-
+                val nickNameViewModel: NickNameViewModel = viewModel()
                 NavHost(
                     navController = navController,
                     startDestination = if (isLoggedIn) "main" else "login",
@@ -47,7 +48,8 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("main") {
                                     popUpTo("login") { inclusive = true }
                                 }
-                            }
+                            },
+                            nickNameViewModel = nickNameViewModel,
                         )
                     }
 
@@ -58,10 +60,20 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    // 닉네임 페이지
+                    composable(route = "nickname") {
+                        NicknamePage(
+                            backToMainPage = { navController.navigateUp() },
+                            nicknameViewModel = nickNameViewModel,
+                            onNicknameRegistered = { navController.navigate("main") } // 메인 페이지로 이동
+                        )
+                    }
+
                     // 메인 페이지
                     composable(route = "main") {
                         MainPage(
                             viewModel = quizViewModel,
+                            nicknameViewModel = nickNameViewModel,
                             onLogout = {
                                 authViewModel.setLoggedIn(false)
                                 navController.navigate("login") {
