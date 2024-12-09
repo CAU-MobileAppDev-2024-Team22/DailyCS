@@ -1,7 +1,6 @@
 package com.example.firebaseexample.ui.pages
 
 import CalendarPage
-import QuizViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -36,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.firebaseexample.data.model.QuizViewModel
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.components.QuizCard
 import com.example.firebaseexample.ui.theme.Typography

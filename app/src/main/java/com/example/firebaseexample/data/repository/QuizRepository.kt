@@ -1,10 +1,9 @@
 package com.example.firebaseexample.data.repository
 
-import QuizViewModel
+import com.example.firebaseexample.data.model.QuizViewModel
 import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.firestore.FirebaseFirestore
-import com.example.firebaseexample.data.model.Problem
 import com.example.firebaseexample.data.model.QuizCategory
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -73,7 +72,8 @@ class QuizRepository {
     fun saveAllQuizResults(
         userId: String,
         categoryName: String,
-        results: List<Map<String, Any>>
+        results: List<Map<String, Any>>,
+        viewModel: QuizViewModel
     ) {
         val db = FirebaseFirestore.getInstance()
 
@@ -124,7 +124,12 @@ class QuizRepository {
                     }
             }
         }
-
+        // ViewModel에 저장 결과 업데이트
+        if (results.isNotEmpty()) {
+            viewModel.setSavedResults(results)
+        } else {
+            println("No results to save to ViewModel.")
+        }
         // 각각의 컬렉션에 저장
         saveToFirestore("solved", solvedQuizzes, categoryName, addDatePath = false) // 정답 저장
         saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = false)  // 오답 저장
@@ -178,4 +183,29 @@ class QuizRepository {
         println(maxWrongCategory)
         return totalWrongAnswers >= 15 // 5*3 이상인지 여부 반환
     }
+
+    // FireStore 에서 quizzes/{categoryName}/problems 까지 불러옴
+    fun fetchProblemDetails(
+        categoryName: String,
+        quizId: String,
+        onSuccess: (Map<String, Any>?) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val documentRef = db.collection("quizzes").document(categoryName)
+
+        documentRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val problems = document.get("problems") as? List<Map<String, Any>>
+                    val problem = problems?.get(quizId.toIntOrNull() ?: -1)
+                    onSuccess(problem) // 문제 데이터를 그대로 반환
+                } else {
+                    onSuccess(null) // 문서가 존재하지 않는 경우
+                }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
+    }
+
 }

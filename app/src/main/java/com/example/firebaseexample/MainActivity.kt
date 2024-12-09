@@ -2,7 +2,7 @@ package com.example.firebaseexample
 
 import BrushupQuizPage
 import QuizListPage
-import QuizViewModel
+import com.example.firebaseexample.data.model.QuizViewModel
 import TodayQuizPage
 import CategoryQuizPage
 import android.os.Bundle
@@ -120,7 +120,7 @@ class MainActivity : ComponentActivity() {
                             totalQuestions = totalQuestions,
                             onRestartQuiz = { navController.navigateUp()},
                             onGoToMainPage = { navController.navigate("main") },
-                            viewModel = QuizViewModel()
+                            viewModel = quizViewModel
                         )
                     }
 
