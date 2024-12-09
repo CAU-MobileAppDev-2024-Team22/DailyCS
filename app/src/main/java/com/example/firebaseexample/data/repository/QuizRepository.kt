@@ -14,19 +14,8 @@ import java.util.Date
 import java.util.Locale
 
 class QuizRepository {
-
     private val db = FirebaseFirestore.getInstance()
 
-    fun getCategoryTitle(categoryId: String, onComplete: (String?) -> Unit) {
-        db.collection("categories").document(categoryId).get()
-            .addOnSuccessListener { document ->
-                val title = document.getString("title")
-                onComplete(title)
-            }
-            .addOnFailureListener {
-                onComplete(null) // 에러 시 null 반환
-            }
-    }
     // 모든 퀴즈 카테고리 가져오기
     fun fetchAllQuizzes(
         onSuccess: (List<Pair<String, QuizCategory>>) -> Unit,
@@ -48,23 +37,6 @@ class QuizRepository {
             .addOnFailureListener { exception ->
                 // Firestore에서 실패한 경우 로그 추가
                 println("Firestore Error: ${exception.message}")
-                onError(exception)
-            }
-    }
-
-
-    // 특정 카테고리 가져오기
-    fun fetchQuizByCategory(
-        categoryId: String,
-        onSuccess: (QuizCategory?) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        db.collection("quizzes").document(categoryId).get()
-            .addOnSuccessListener { document ->
-                val category = document.toObject(QuizCategory::class.java)
-                onSuccess(category)
-            }
-            .addOnFailureListener { exception ->
                 onError(exception)
             }
     }
