@@ -79,7 +79,7 @@ fun MainPage(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
+                    IconButton(onClick = { onLogout() }) {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile"

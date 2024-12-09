@@ -37,19 +37,25 @@ class MainActivity : ComponentActivity() {
                 val nickNameViewModel: NickNameViewModel = viewModel()
                 NavHost(
                     navController = navController,
-                    startDestination = if (isLoggedIn) "login" else "login",
+                    startDestination = if (isLoggedIn) "main" else "login",
                 ) {
                     // 로그인 페이지
                     composable(route = "login") {
                         LoginPage(
                             goToRegisterPage = { navController.navigate("register") },
-                            onLoginSuccess = {
+                            onLoginSuccess = { hasNickname ->
                                 authViewModel.setLoggedIn(true)
-                                navController.navigate("main") {
-                                    popUpTo("login") { inclusive = true }
+                                if (hasNickname) {
+                                    navController.navigate("main") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("nickname") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             },
-                            nickNameViewModel = nickNameViewModel,
+                            nickNameViewModel = nickNameViewModel
                         )
                     }
 
