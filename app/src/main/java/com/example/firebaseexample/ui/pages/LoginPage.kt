@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.firebaseexample.ui.theme.LineColor
 import com.example.firebaseexample.ui.theme.TextFieldBorder
 import com.example.firebaseexample.ui.theme.ThemeBlue
@@ -79,11 +80,12 @@ fun LoginPage(
             Text(
                 text = "매일CS",
                 fontWeight = FontWeight.Bold,
-                style = Typography.titleLarge
+                style = Typography.titleLarge.copy(fontSize = 28.sp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "매일 늘려가는 CS 지식 한 걸음",
+                style = Typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(

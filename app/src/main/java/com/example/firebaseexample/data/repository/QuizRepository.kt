@@ -208,4 +208,26 @@ class QuizRepository {
             }
     }
 
+    // 닉네임 저장 로직
+    fun saveNickname(
+        userId: String,
+        nickname: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val userRef = db.collection("users").document(userId)
+
+        // 닉네임을 Firestore에 저장
+        userRef.set(
+            mapOf("nickname" to nickname),
+            SetOptions.merge() // 기존 데이터와 병합
+        ).addOnSuccessListener {
+            println("Nickname saved successfully!")
+            onSuccess()
+        }.addOnFailureListener { exception ->
+            println("Error saving nickname: ${exception.message}")
+            onError(exception)
+        }
+    }
+
 }

@@ -86,6 +86,12 @@ val Typography = Typography(
         fontSize = 20.sp,
         letterSpacing = 0.3.sp
     ),
+    titleSmall = TextStyle(
+        fontFamily = baloo2,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        letterSpacing = 0.3.sp
+    ),
     bodyLarge = TextStyle(
         fontFamily = baloo2,
         fontWeight = FontWeight.Bold,

@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = if (isLoggedIn) "main" else "login",
+                    startDestination = if (isLoggedIn) "nickname" else "login",
                 ) {
                     // 로그인 페이지
                     composable(route = "login") {
@@ -55,6 +55,14 @@ class MainActivity : ComponentActivity() {
                     composable(route = "register") {
                         RegisterPage(
                             backToLoginPage = { navController.navigateUp() }
+                        )
+                    }
+
+                    // 닉네임 페이지
+                    composable(route = "nickname") {
+                        NicknamePage(
+                            backToMainPage = { navController.navigateUp() },
+                            onNicknameRegistered = { navController.navigate("main") } // 메인 페이지로 이동
                         )
                     }
 
