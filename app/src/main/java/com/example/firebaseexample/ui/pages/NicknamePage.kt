@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.firebaseexample.data.repository.QuizRepository
 import com.example.firebaseexample.ui.theme.LineColor
@@ -58,9 +60,13 @@ fun NicknamePage(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Text(text = "닉네임 설정")
+                    Text(
+                        text = "닉네임 설정",
+                        style = Typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { backToMainPage() }) {
@@ -69,6 +75,7 @@ fun NicknamePage(
                 }
             )
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier

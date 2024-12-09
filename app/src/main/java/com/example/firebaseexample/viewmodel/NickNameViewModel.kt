@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class NickNameViewModel : ViewModel() {
-    private val _nickname = MutableStateFlow<String?>(null)
+    private val _nickname = MutableStateFlow<String?>("로딩중...")
     val nickname: StateFlow<String?> get() = _nickname
 
     fun setNickname(nickname: String?) {

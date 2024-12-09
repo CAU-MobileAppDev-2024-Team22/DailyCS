@@ -57,7 +57,7 @@ fun MainPage(
 ) {
     var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
     val quizRepository = QuizRepository()
-    val nickname by nicknameViewModel.nickname.collectAsState(initial = "닉네임 없음")
+    val nickname by nicknameViewModel.nickname.collectAsState(initial = "로딩중")
 
     // 틀린 문제 수 체크
     LaunchedEffect(Unit) {
