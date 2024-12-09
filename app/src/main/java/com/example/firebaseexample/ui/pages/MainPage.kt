@@ -52,7 +52,8 @@ fun MainPage(
     onLogout: () -> Unit,
     goToQuizListPage: () -> Unit,
     goToTodayQuizPage: () -> Unit, // 오늘의 퀴즈 페이지로 이동하는 콜백
-    goToBrushQuizPage: () -> Unit // 복습 추천 문제 페이지로 이동하는 콜백
+    goToBrushQuizPage: () -> Unit, // 복습 추천 문제 페이지로 이동하는 콜백
+    goToNicknamePage: () -> Unit // 닉네임 페이지로 이동하는 콜백
 ) {
     var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
     val quizRepository = QuizRepository()
@@ -71,8 +72,9 @@ fun MainPage(
                 title = {
                     nickname?.let {
                         Text(
-                            text = it, // 닉네임 출력
-                            style = Typography.titleLarge
+                            text = it,
+                            style = Typography.titleLarge,
+                            modifier = Modifier.clickable { goToNicknamePage() } // 클릭 시 닉네임 페이지로 이동
                         )
                     }
                 },
