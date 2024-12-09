@@ -139,6 +139,45 @@ class QuizRepository {
         saveToFirestore("wrong", wrongQuizzes, categoryName, addDatePath = true)  // 날짜별 오답 저장
     }
 
+    suspend fun checkSolvedAnswers(
+        viewModel: QuizViewModel
+    ) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val subjects = listOf("운영체제", "네트워크", "컴퓨터구조", "자료구조", "알고리즘", "데이터베이스")
+
+        // 각 카테고리별 푼 문제 수를 저장할 맵
+        val solvedCounts = mutableMapOf<String, Int>()
+
+        println("User ID: $userId")
+        for (subject in subjects) {
+            val categoryDocument = userId?.let {
+                db.collection("users")
+                    .document(it)
+                    .collection("solved")
+                    .document(subject)
+                    .get()
+                    .await() // 비동기 호출
+            }
+
+            if (categoryDocument != null) {
+                if (categoryDocument.exists()) {
+                    // 필드 수를 세기
+                    val solvedAnswersCount = categoryDocument.data?.size ?: 0
+
+                    // 카테고리와 푼 문제 수 저장
+                    solvedCounts[subject] = solvedAnswersCount
+                    println("Total solved answers for $subject: $solvedAnswersCount")
+                } else {
+                    println("Document for '$subject' does not exist.")
+                }
+            }
+        }
+
+        // 뷰모델에 카테고리별 푼 문제 수 저장
+        viewModel.solvedCounts.value = solvedCounts // 뷰모델에 저장
+        println("Solved counts per category: $solvedCounts")
+    }
+
     suspend fun checkWrongAnswers(
         viewModel: QuizViewModel
     ): Boolean {
@@ -159,20 +198,14 @@ class QuizRepository {
 
             if (documentSnapshot != null) {
                 if (documentSnapshot.exists()) {
-                    val wrongAnswers = documentSnapshot.data?.values?.sumOf { map ->
-                        if (map is Map<*, *>) {
-                            // 맵의 개수 반환
-                            map.size
-                        } else {
-                            0
-                        }
-                    } ?: 0
+                    val wrongAnswers = documentSnapshot.data?.size ?: 0
+
                     if(maxWrongCategory < wrongAnswers){
                         maxWrongCategory = wrongAnswers
                         viewModel.brushUpCategory.value = subject
                     }
                     totalWrongAnswers += wrongAnswers
-                    println("total: $totalWrongAnswers")
+                    println("total wrong: $totalWrongAnswers")
                 } else {
                     println("문서 '$subject'가 존재하지 않습니다.")
                 }
@@ -181,7 +214,7 @@ class QuizRepository {
         }
         println(viewModel.brushUpCategory.value)
         println(maxWrongCategory)
-        return totalWrongAnswers >= 15 // 5*3 이상인지 여부 반환
+        return totalWrongAnswers >= 5 // wrong 문제가 5개 이상인지 여부 반환
     }
 
     // FireStore 에서 quizzes/{categoryName}/problems 까지 불러옴
