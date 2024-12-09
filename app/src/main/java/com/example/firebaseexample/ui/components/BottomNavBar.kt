@@ -38,7 +38,11 @@ fun BottomNavigationBar(navController: NavController) {
             label = { Text("Profile",
                 style = Typography.bodySmall.copy(fontWeight = FontWeight.Bold)) },
             selected = false,
-            onClick = { /* Profile 클릭 이벤트 */ }
+            onClick = {
+                navController.navigate("myPage") {
+                    popUpTo("myPage") { inclusive = true } // 중복 쌓이지 않도록 설정
+                }
+            }
         )
     }
 }
