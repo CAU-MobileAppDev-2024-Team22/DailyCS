@@ -31,8 +31,8 @@ fun CircularChart(
         PieChart(
             pieChartData = PieChartData(
                 listOf(
-                    PieChartData.Slice(value = progress, color = ThemeLightGray), // 녹색 진행도
-                    PieChartData.Slice(value = 1f - progress, color = ThemeBlue) // 파란색 배경
+                    PieChartData.Slice(value = 1f - progress, color = ThemeLightGray), // 녹색 진행도
+                    PieChartData.Slice(value = progress, color = ThemeBlue) // 파란색 배경
                 )
             ),
             modifier = Modifier.fillMaxSize(),

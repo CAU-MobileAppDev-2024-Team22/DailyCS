@@ -53,6 +53,9 @@ fun QuizResultPage(
                     )},
                 navigationIcon = {
                     IconButton(onClick = {
+                        viewModel.resetSavedResults()
+                        viewModel.resetProblemDetails()
+                        viewModel.resetQuizResults()
                         navController.navigate("main")
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -136,11 +139,7 @@ fun QuizResultPage(
                                             modifier = Modifier.padding(top = 8.dp)
                                         )
                                         Text(
-                                            text = "정답: ${problemDetails!!["answer"] ?: "정답 없음"}",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                        Text(
-                                            text = "코멘트: ${problemDetails!!["comment"] ?: "코멘트 없음"}",
+                                            text = "정답: ${problemDetails !!["answer"] ?: "정답 없음"}",
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                         Text(

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,8 +64,8 @@ fun QuizScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(categoryName, style = MaterialTheme.typography.titleLarge) },
+            CenterAlignedTopAppBar(
+                title = { Text(categoryName, style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = {
                         if (viewModel.solvedQuizzesNum.value == 0){
