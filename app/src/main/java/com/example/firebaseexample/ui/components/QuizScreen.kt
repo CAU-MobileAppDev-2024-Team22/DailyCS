@@ -40,14 +40,14 @@ fun QuizScreen(
     onTimeout: () -> Unit = {},
     categoryName: String,
 ) {
+    // val score = viewModel.score.value
     val repository = QuizRepository()
     val quizzes = viewModel.quizzes.value
-    val score = viewModel.score.value
     val totalQuestions = viewModel.totalQuestions.value
     var currentIndex by remember { mutableStateOf(0) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
-    var ans = true
     val currentUser = FirebaseAuth.getInstance().currentUser?.uid
+    var ans = true
 
     if (quizzes.isEmpty()) {
         LaunchedEffect(Unit) {
@@ -61,6 +61,7 @@ fun QuizScreen(
     }
 
     val currentQuiz = quizzes[currentIndex]
+    val quizId = currentQuiz["quizId"]?.toString() ?: currentIndex.toString() // 랜덤한 `quizId` 또는 기본 인덱스
 
     Scaffold(
         topBar = {
@@ -104,14 +105,16 @@ fun QuizScreen(
                 selectedOption = selectedOption,
                 onOptionClick = { selectedOption = it },
                 onSubmit = {
+                    val isCorrect = selectedOption == currentQuiz["answer"]
                     viewModel.updateSolvedQuzzesNum()
+
                     if (selectedOption == currentQuiz["answer"]) {
                         viewModel.updateScore(true)
                         ans = true
                     } else {
                         ans = false
                     }
-                    viewModel.updateDB(categoryName, currentIndex.toString(), ans)
+                    viewModel.updateDB(categoryName, quizId, ans)
                     if (currentIndex < quizzes.size - 1) {
                         currentIndex++
                         selectedOption = null

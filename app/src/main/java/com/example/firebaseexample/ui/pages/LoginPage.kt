@@ -1,5 +1,6 @@
 package com.example.firebaseexample.ui.pages
 
+import LoadingAnimation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -50,11 +52,14 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun LoginPage(
     goToRegisterPage: () -> Unit,
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (Boolean) -> Unit,
     nickNameViewModel: NickNameViewModel
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var isLoading by rememberSaveable { mutableStateOf(false) }
+    var errorMessage by rememberSaveable { mutableStateOf("") } // 에러 메시지 관리
+    var showErrorDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier
@@ -72,127 +77,171 @@ fun LoginPage(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "매일CS",
-                fontWeight = FontWeight.Bold,
-                style = Typography.titleLarge.copy(fontSize = 28.sp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "매일 늘려가는 CS 지식 한 걸음",
-                style = Typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = email,
-                onValueChange = { email = it },
-                label = {
-                    Text(
-                        text = "E-mail",
-                        style = Typography.titleSmall,
-                        color = ThemeGray
-                    )},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = ThemeBlue,
-                    unfocusedBorderColor = TextFieldBorder
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
+        if (isLoading) {
+            // 로딩 애니메이션 표시
+            LoadingAnimation()
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                value = password,
-                onValueChange = { password = it },
-                label = {
-                    Text(
-                        text = "Password",
-                        style = Typography.titleSmall,
-                        color = ThemeGray
-                    )},
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = ThemeBlue,
-                    unfocusedBorderColor = TextFieldBorder
-                ),
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "매일CS",
+                    fontWeight = FontWeight.Bold,
+                    style = Typography.titleLarge.copy(fontSize = 28.sp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "매일 늘려가는 CS 지식 한 걸음",
+                    style = Typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = email,
+                    onValueChange = { email = it },
+                    label = {
+                        Text(
+                            text = "E-mail",
+                            style = Typography.titleSmall,
+                            color = ThemeGray
+                        )},
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = ThemeBlue,
+                        unfocusedBorderColor = TextFieldBorder
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = password,
+                    onValueChange = { password = it },
+                    label = {
+                        Text(
+                            text = "Password",
+                            style = Typography.titleSmall,
+                            color = ThemeGray
+                        )},
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = ThemeBlue,
+                        unfocusedBorderColor = TextFieldBorder
+                    ),
 
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black,
-                    contentColor = Color.White
-                ),
-                onClick = {
-                    loginUser(email, password, onLoginSuccess, nickNameViewModel)
+                    )
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black,
+                        contentColor = Color.White
+                    ),
+                    onClick = {
+                        isLoading = true
+                        loginUser(
+                            email,
+                            password,
+                            onLoginFailure = { error ->
+                                isLoading = false
+                                errorMessage = error // 에러 메시지 설정
+                                showErrorDialog = true // 팝업창 표시
+                            },
+                            onLoginSuccess = {
+                                isLoading = false
+                                onLoginSuccess(it)
+                            },
+                            nickNameViewModel = nickNameViewModel
+                        )
+                    }
+                ) {
+                    Text(
+                        text = "로그인",
+                    )
                 }
-            ) {
-                Text(
-                    text = "로그인",
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp),
+                        color = LineColor
+                    )
+                    Text(
+                        text = "OR",
+                        modifier = Modifier.weight(1f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        color = ThemeGray,
+                        style = Typography.bodySmall
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp),
+                        color = LineColor
+                    )
+                }
+                TextButton(
+                    onClick = goToRegisterPage
+                ) {
+                    Text(
+                        text = "회원가입",
+                        modifier = Modifier.weight(1f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        color = ThemeGray,
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(1.dp),
-                    color = LineColor
-                )
-                Text(
-                    text = "OR",
-                    modifier = Modifier.weight(1f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    color = ThemeGray,
-                    style = Typography.bodySmall
-                )
-                HorizontalDivider(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(1.dp),
-                    color = LineColor
-                )
-            }
-            TextButton(
-                onClick = goToRegisterPage
-            ) {
-                Text(
-                    text = "회원가입",
-                    modifier = Modifier.weight(1f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    color = ThemeGray,
-                )
-            }
+        }
+        // 에러 팝업
+        if (showErrorDialog) {
+            AlertDialog(
+                onDismissRequest = { showErrorDialog = false },
+                confirmButton = {
+                    Button(
+                        onClick = { showErrorDialog = false },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ThemeBlue, // 배경 색상
+                            contentColor = Color.White // 텍스트 색상
+                        )) {
+                        Text(text = "확인",
+                            style = Typography.bodySmall)
+                    }
+                },
+                title = { Text("로그인 실패") },
+                text = { Text("등록되지 않은 회원입니다.") }
+            )
         }
     }
 }
 
-fun loginUser(email: String, password: String, onLoginSuccess: () -> Unit, nickNameViewModel: NickNameViewModel) {
+fun loginUser(
+    email: String,
+    password: String,
+    onLoginFailure: (String) -> Unit,
+    onLoginSuccess: (Boolean) -> Unit, // 닉네임 존재 여부를 콜백으로 전달
+    nickNameViewModel: NickNameViewModel
+) {
     val auth = FirebaseAuth.getInstance()
-    val userId = auth.currentUser?.uid
     val quizRepository = QuizRepository()
 
     auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                val userId = auth.currentUser?.uid
                 if (userId != null) {
                     // 로그인 성공 시 닉네임 가져오기
                     quizRepository.fetchNickname(
@@ -201,19 +250,21 @@ fun loginUser(email: String, password: String, onLoginSuccess: () -> Unit, nickN
                             if (nickname != null) {
                                 nickNameViewModel.setNickname(nickname) // 닉네임을 뷰모델에 저장
                                 println("로그인 성공: 닉네임 [$nickname] 저장 완료")
+                                onLoginSuccess(true) // 닉네임 존재 -> true 전달
                             } else {
                                 println("닉네임이 설정되지 않았습니다.")
+                                onLoginSuccess(false) // 닉네임 없음 -> false 전달
                             }
-                            onLoginSuccess() // 로그인 성공 콜백 실행
                         },
                         onError = { exception ->
-                            println("닉네임 가져오기 실패: ${exception.message}")
+                            onLoginFailure("닉네임을 불러오지 못했습니다.")
                         }
                     )
                 } else {
-                    println("사용자 ID를 찾을 수 없습니다.")
+                    onLoginFailure("사용자 ID를 찾을 수 없습니다.") // 사용자 ID 없음
                 }
+            } else {
+                onLoginFailure(task.exception?.message ?: "로그인 실패") // 실패 메시지 전달
             }
         }
 }
-
