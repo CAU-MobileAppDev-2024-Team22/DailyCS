@@ -37,10 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firebaseexample.data.model.QuizViewModel
+import com.example.firebaseexample.data.repository.QuizRepository
 import com.example.firebaseexample.ui.components.BottomNavigationBar
 import com.example.firebaseexample.ui.theme.ThemeDarkGreen
 import com.example.firebaseexample.ui.theme.Typography
 import com.example.firebaseexample.viewmodel.NickNameViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,11 +55,15 @@ fun MainPage(
     goToBrushQuizPage: () -> Unit // 복습 추천 문제 페이지로 이동하는 콜백
 ) {
     var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
+    val quizRepository = QuizRepository()
     val nickname by nicknameViewModel.nickname.collectAsState(initial = "닉네임 없음")
+
     // 틀린 문제 수 체크
     LaunchedEffect(Unit) {
+        loadUserNickname(quizRepository, nicknameViewModel)
         viewModel.checkWrongAnswers()
         viewModel.fetchTodayCategory()
+        // nickname 을 파이어 스토어에서 읽어온 후, viewmodel에 저장하는 함수 추가
     }
     Scaffold(
         topBar = {
@@ -253,4 +259,28 @@ fun ButtonCard(
     }
 }
 
+fun loadUserNickname(
+    quizRepository: QuizRepository,
+    nicknameViewModel: NickNameViewModel
+) {
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    if (userId != null) {
+        quizRepository.fetchNickname(
+            userId = userId,
+            onSuccess = { fetchedNickname ->
+                fetchedNickname?.let {
+                    nicknameViewModel.setNickname(it) // 닉네임 뷰모델 업데이트
+                    println("닉네임 업데이트: $it")
+                } ?: run {
+                    println("닉네임이 설정되지 않았습니다.")
+                }
+            },
+            onError = { exception ->
+                println("닉네임 불러오기 실패: ${exception.message}")
+            }
+        )
+    } else {
+        println("사용자 ID를 찾을 수 없습니다. 로그아웃 처리 필요.")
+    }
+}
 
