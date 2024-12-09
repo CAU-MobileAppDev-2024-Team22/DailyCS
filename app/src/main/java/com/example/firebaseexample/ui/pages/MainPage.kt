@@ -125,7 +125,7 @@ fun MainPage(
             QuizCard(
                 title = if (viewModel.isButtonEnabled.value) "복습 추천 문제" else "복습 추천 문제(비활성화)",
                 subtitle = "5문제",
-                tag = viewModel.brushUpCategory.value,
+                tag = if (viewModel.isButtonEnabled.value) viewModel.brushUpCategory.value else "-",
                 time = "2 min",
                 backgroundColor = Color(0xFF5D5D5D),
                 onClick = {
@@ -157,7 +157,7 @@ fun MainPage(
                     }
                 },
                 title = { Text("알림") },
-                text = { Text("복습 추천 문제를 활성화하려면 조건을 충족해야 합니다.") }
+                text = { Text("복습 추천 문제를 활성화하려면 조건을 충족해야 합니다.\n\n조건 : 틀린 문제 5개 이상") }
             )
         }
     }
