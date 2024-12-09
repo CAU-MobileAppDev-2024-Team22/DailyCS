@@ -109,9 +109,11 @@ class QuizViewModel : ViewModel() {
 
     fun updateDB(categoryName: String, quizId: String, isCorrect: Boolean) {
         val randomQuiz = quizzes.value.find { it["quizId"] == quizId } ?: emptyMap<String, Any>()
+        val fixedQuizID = randomQuiz["quizId"]?.toString() ?: quizId
+
         val result = mapOf(
             "categoryName" to categoryName,
-            "quizId" to randomQuiz["quizId"].toString(), // 랜덤하게 재설정된 ID 사용
+            "quizId" to fixedQuizID, // 랜덤하게 재설정된 ID 사용
             "isCorrect" to isCorrect
         )
         quizResults.add(result)
