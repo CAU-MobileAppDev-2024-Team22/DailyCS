@@ -89,7 +89,8 @@ class MainActivity : ComponentActivity() {
                             goToQuizListPage = { navController.navigate("quizList") },
                             goToTodayQuizPage = { navController.navigate("todayQuiz") },
                             goToBrushQuizPage = { navController.navigate("brushupQuiz")},
-                            goToNicknamePage = { navController.navigate("nickname") }
+                            goToNicknamePage = { navController.navigate("nickname") },
+                            navController = navController
                         )
                     }
 
