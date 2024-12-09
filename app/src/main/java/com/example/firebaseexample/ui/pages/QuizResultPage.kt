@@ -1,11 +1,15 @@
 package com.example.firebaseexample.ui.pages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import com.example.firebaseexample.data.model.QuizViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -17,14 +21,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.firebaseexample.ui.components.CircularChart
 import com.example.firebaseexample.data.repository.QuizRepository
+import com.example.firebaseexample.ui.theme.ButtonGray
+import com.example.firebaseexample.ui.theme.LineColor
 import com.example.firebaseexample.ui.theme.ThemeBlue
 import com.example.firebaseexample.ui.theme.ThemeGray
+import com.example.firebaseexample.ui.theme.ThemeGreen
 import com.example.firebaseexample.ui.theme.ThemeLightGray
+import com.example.firebaseexample.ui.theme.ThemePurple
 import com.example.firebaseexample.ui.theme.Typography
 import com.google.firebase.auth.FirebaseAuth
 
@@ -38,9 +48,6 @@ fun QuizResultPage(
     viewModel: QuizViewModel,
     navController: NavController
 ) {
-    val repository = QuizRepository()
-    val currentUser = FirebaseAuth.getInstance().currentUser?.uid
-
     val savedResults by viewModel.savedResults.collectAsState()
     val problemDetailsVisibility = remember { mutableStateMapOf<String, Boolean>() }
 
@@ -52,7 +59,8 @@ fun QuizResultPage(
                         text = "퀴즈 결과",
                         style = Typography.titleMedium,
                         textAlign = TextAlign.Center,
-                    )},
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.resetSavedResults()
@@ -62,146 +70,176 @@ fun QuizResultPage(
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White
+                )
             )
         },
         content = { paddingValues ->
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                    .padding(paddingValues)
+                    .background(color = Color.White)
+                    .verticalScroll(rememberScrollState()) // 스크롤 가능하게 설정
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    CircularChart(
-                        progress = score.toFloat() / totalQuestions.toFloat(),
-                        score = score,
-                        totalQuestions = totalQuestions
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                // 차트
+                CircularChart(
+                    progress = score.toFloat() / totalQuestions.toFloat(),
+                    score = score,
+                    totalQuestions = totalQuestions
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
+                // 문제별 결과
+                savedResults.forEachIndexed { index, result ->
+                    val quizId = result["quizId"] as? String ?: "Unknown"
+                    val categoryName = result["categoryName"] as? String ?: "Unknown"
+                    val isCorrect = result["isCorrect"] as? Boolean ?: false
+                    val status = if (isCorrect) "정답" else "오답"
+
+                    val problemDetailsFlow = viewModel.getProblemDetailsFlow(quizId)
+                    val problemDetails by problemDetailsFlow.collectAsState()
+
+                    val quizIdx = index + 1
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White, RoundedCornerShape(20.dp))
+                            .border(1.dp, color = LineColor, shape = RoundedCornerShape(20.dp))
+                            .padding(16.dp)
                     ) {
-                        items(savedResults) { result ->
-                            val quizId = result["quizId"] as? String ?: "Unknown"
-                            val categoryName = result["categoryName"] as? String ?: "Unknown"
-                            val isCorrect = result["isCorrect"] as? Boolean ?: false
-                            val status = if (isCorrect) "정답" else "오답"
-
-                            val problemDetailsFlow = viewModel.getProblemDetailsFlow(quizId)
-                            val problemDetails by problemDetailsFlow.collectAsState()
-
-                            val quizIdx = quizId.toInt() + 1
-
-                            Box(
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Q$quizIdx.$status",
+                                style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp)
-                                    .background(ThemeGray)
-                            ) {
-                                HorizontalDivider(
-                                    color = ThemeLightGray,
-                                    thickness = 2.dp,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp),
-                            ) {
-                                Text(
-                                    text = "Q$quizIdx.",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier
-                                        .background(
-                                            color = if (isCorrect) ThemeBlue else ThemeGray,
-                                            shape = RoundedCornerShape(20.dp)
-                                        )
-                                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                                    color = Color.White,
-                                )
-                                Button(onClick = {
+                                    .background(
+                                        color = if (isCorrect) ThemeBlue else ThemeGray,
+                                        shape = RoundedCornerShape(20.dp)
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                color = Color.White
+                            )
+                            Button(
+                                onClick = {
                                     val isVisible = problemDetailsVisibility[quizId] ?: false
                                     problemDetailsVisibility[quizId] = !isVisible
 
                                     if (!isVisible) {
-                                        viewModel.loadProblemDetails(categoryName, quizId)
-                                    }
-                                }) {
-                                    Text(
-                                        text = if (problemDetailsVisibility[quizId] == true) "닫기" else "문제 보기",
-                                        style = MaterialTheme.typography.bodySmall)
-                                }
+                                    viewModel.loadProblemDetails(categoryName, quizId) }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ThemeBlue,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text(
+                                    text = if (problemDetailsVisibility[quizId] == true) "닫기" else "정답 보기",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
 
-                                if (problemDetailsVisibility[quizId] == true) {
-                                    if (problemDetails != null) {
-                                        Text(
-                                            text = "질문: ${problemDetails!!["question"] ?: "질문 없음"}",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            modifier = Modifier.padding(top = 8.dp)
-                                        )
-                                        Text(
-                                            text = "정답: ${problemDetails!!["answer"] ?: "정답 없음"}",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                        Text(
-                                            text = "선택지:",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
+                        if (problemDetailsVisibility[quizId] == true) {
+                            if (problemDetails != null) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "${problemDetails!!["question"] ?: "질문 없음"}",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(32.dp)
+                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        val correctAnswer = problemDetails!!["answer"] as? String
+
                                         (problemDetails!!["options"] as? List<*>)?.forEachIndexed { index, option ->
-                                            Text(
-                                                text = "$index: $option",
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
+                                            val isCorrectOption = correctAnswer == option
+                                            Card(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = if (isCorrectOption) ThemeBlue else ButtonGray
+                                                ),
+                                                shape = RoundedCornerShape(20.dp)
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(16.dp)
+                                                ) {
+                                                    Text(
+                                                        text = "$option",
+                                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Normal),
+                                                        color = if (isCorrectOption) Color.White else Color.Black
+                                                    )
+                                                }
+                                            }
                                         }
-                                    } else {
-                                        Text(
-                                            text = "로딩 중...",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
                                     }
                                 }
+                            } else {
+                                Text(
+                                    text = "로딩 중...",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
-                    Button(
-                        onClick = {
-                            viewModel.resetSavedResults()
-                            viewModel.resetProblemDetails()
-                            viewModel.resetQuizResults()
-                            onRestartQuiz()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "다시 풀기",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                }
 
-                    Button(
-                        onClick = {
-                            viewModel.resetSavedResults()
-                            viewModel.resetProblemDetails()
-                            viewModel.resetQuizResults()
-                            onGoToMainPage()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "메인 페이지로",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                // 버튼
+                Button(
+                    onClick = {
+                        viewModel.resetSavedResults()
+                        viewModel.resetProblemDetails()
+                        viewModel.resetQuizResults()
+                        onRestartQuiz()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ThemeBlue,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "다시 풀기",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        viewModel.resetSavedResults()
+                        viewModel.resetProblemDetails()
+                        viewModel.resetQuizResults()
+                        onGoToMainPage()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ThemeBlue,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "메인 페이지로",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
