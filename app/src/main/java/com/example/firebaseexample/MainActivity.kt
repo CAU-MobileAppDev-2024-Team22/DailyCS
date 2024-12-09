@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                 val nickNameViewModel: NickNameViewModel = viewModel()
                 NavHost(
                     navController = navController,
-                    startDestination = if (isLoggedIn) "main" else "login",
+                    startDestination = if (isLoggedIn) "login" else "login",
                 ) {
                     // 로그인 페이지
                     composable(route = "login") {
