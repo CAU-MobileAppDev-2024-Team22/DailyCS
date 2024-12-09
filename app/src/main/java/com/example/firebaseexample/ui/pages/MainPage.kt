@@ -53,6 +53,7 @@ fun MainPage(
 // 틀린 문제 수 체크
     LaunchedEffect(Unit) {
         viewModel.checkWrongAnswers()
+        viewModel.fetchTodayCategory()
     }
     Scaffold(
         topBar = {
