@@ -43,7 +43,6 @@ import com.example.firebaseexample.ui.theme.ThemeDarkGreen
 import com.example.firebaseexample.ui.theme.Typography
 import com.example.firebaseexample.viewmodel.NickNameViewModel
 import com.google.firebase.auth.FirebaseAuth
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainPage(
@@ -53,7 +52,8 @@ fun MainPage(
     goToQuizListPage: () -> Unit,
     goToTodayQuizPage: () -> Unit, // 오늘의 퀴즈 페이지로 이동하는 콜백
     goToBrushQuizPage: () -> Unit, // 복습 추천 문제 페이지로 이동하는 콜백
-    goToNicknamePage: () -> Unit // 닉네임 페이지로 이동하는 콜백
+    goToNicknamePage: () -> Unit, // 닉네임 페이지로 이동하는 콜백
+    goToMyPage: () -> Unit // MyPage로 이동하는 콜백
 ) {
     var showDialog by remember { mutableStateOf(false) } // 팝업창 상태 관리
     val quizRepository = QuizRepository()
@@ -64,8 +64,8 @@ fun MainPage(
         loadUserNickname(quizRepository, nicknameViewModel)
         viewModel.checkWrongAnswers()
         viewModel.fetchTodayCategory()
-        // nickname 을 파이어 스토어에서 읽어온 후, viewmodel에 저장하는 함수 추가
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -79,7 +79,7 @@ fun MainPage(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* 프로필 클릭 이벤트 */ }) {
+                    IconButton(onClick = { goToMyPage() }) { // 아이콘 클릭 시 MyPage로 이동
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile"
@@ -94,7 +94,7 @@ fun MainPage(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(16.dp) // 동일한 padding 적용
+                .padding(16.dp)
         ) {
             // 달력 섹션
             Card(

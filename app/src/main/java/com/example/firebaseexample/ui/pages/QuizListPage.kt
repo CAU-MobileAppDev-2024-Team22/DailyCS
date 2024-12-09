@@ -36,9 +36,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun QuizListPage(
     onCategoryClick: (String) -> Unit,
-    navController: NavController // NavController 추가
+    navController: NavController, // NavController 추가
+    viewModel: QuizListViewModel
 ) {
-    val viewModel: QuizListViewModel = viewModel()
     val quizViewModel: QuizViewModel = viewModel()
     val quizCategories by viewModel.quizCategories.collectAsState()
 

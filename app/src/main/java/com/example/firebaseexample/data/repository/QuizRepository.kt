@@ -150,6 +150,7 @@ class QuizRepository {
         val solvedCounts = mutableMapOf<String, Int>()
 
         println("User ID: $userId")
+        viewModel.totalSolvedQuizzes.value = 0
         for (subject in subjects) {
             val categoryDocument = userId?.let {
                 db.collection("users")
@@ -168,14 +169,18 @@ class QuizRepository {
                     // 카테고리와 푼 문제 수 저장
                     solvedCounts[subject] = solvedAnswersCount
                     println("Total solved answers for $subject: $solvedAnswersCount")
+                    viewModel.totalSolvedQuizzes.intValue += solvedAnswersCount
+
                 } else {
                     println("Document for '$subject' does not exist.")
                 }
             }
+            println("????????????????" +viewModel.totalSolvedQuizzes.intValue)
         }
 
         // 뷰모델에 카테고리별 푼 문제 수 저장
         viewModel.solvedCounts.value = solvedCounts // 뷰모델에 저장
+
         println("Solved counts per category: $solvedCounts")
     }
 

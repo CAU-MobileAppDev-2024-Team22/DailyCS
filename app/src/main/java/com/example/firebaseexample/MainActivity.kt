@@ -5,6 +5,7 @@ import QuizListPage
 import com.example.firebaseexample.data.model.QuizViewModel
 import TodayQuizPage
 import CategoryQuizPage
+import MyPage
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,7 @@ import com.example.firebaseexample.ui.pages.*
 import com.example.firebaseexample.ui.theme.FirebaseExampleTheme
 import com.example.firebaseexample.viewmodel.AuthViewModel
 import com.example.firebaseexample.viewmodel.NickNameViewModel
+import com.example.firebaseexample.viewmodel.QuizListViewModel
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
                 // 로그인 상태 관찰
                 val isLoggedIn = authViewModel.isLoggedIn
-
+                val quizListviewModel: QuizListViewModel = viewModel()
                 val quizViewModel: QuizViewModel = viewModel()
                 val nickNameViewModel: NickNameViewModel = viewModel()
                 NavHost(
@@ -83,7 +85,8 @@ class MainActivity : ComponentActivity() {
                             goToQuizListPage = { navController.navigate("quizList") },
                             goToTodayQuizPage = { navController.navigate("todayQuiz") },
                             goToBrushQuizPage = { navController.navigate("brushupQuiz")},
-                            goToNicknamePage = { navController.navigate("nickname") }
+                            goToNicknamePage = { navController.navigate("nickname") },
+                            goToMyPage = { navController.navigate("myPage") }
                         )
                     }
 
@@ -93,7 +96,8 @@ class MainActivity : ComponentActivity() {
                             onCategoryClick = { categoryId ->
                                 navController.navigate("quizPage/$categoryId")
                             },
-                            navController = navController
+                            navController = navController,
+                            viewModel = quizListviewModel
                         )
                     }
 
@@ -172,6 +176,22 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         )
+                    }
+                    composable(route = "myPage") {
+
+                            // QuizViewModel 인스턴스 생성 (필요에 따라 SharedViewModel 사용)
+
+                            // MyPage로 이동 시 뒤로 가기 버튼을 처리하기 위한 네비게이션 컨트롤러 필요
+                            MyPage(
+                                quizViewModel = quizViewModel,
+                                onBackPressed = {
+                                    // 네비게이션 뒤로 가기
+                                    navController.popBackStack()
+                                },
+                                navController = navController,
+                                quizListViewModel = quizListviewModel
+                            )
+
                     }
                 }
             }
