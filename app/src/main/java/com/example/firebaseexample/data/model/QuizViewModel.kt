@@ -201,13 +201,22 @@ class QuizViewModel : ViewModel() {
                     val fetchedQuizzes = document.get("problems") as? List<Map<String, Any>> ?: emptyList()
                     println("Fetched Quizzes for Random: $fetchedQuizzes")
 
-                    // 랜덤으로 5개 선택
-                    val randomQuizzes = fetchedQuizzes.shuffled().take(quizNum)
-                    println("Random Quizzes: $randomQuizzes")
+                    // `fetchedQuizzes`와 원래 인덱스를 함께 보관
+                    val indexedQuizzes = fetchedQuizzes.mapIndexed { index, quiz ->
+                        index to quiz
+                    }
 
-                    // 상태 업데이트
-                    quizzes.value = randomQuizzes
-                    totalQuestions.value = randomQuizzes.size
+                    // 랜덤으로 선택 (인덱스와 데이터를 포함)
+                    val randomQuizzesWithIndices = indexedQuizzes.shuffled().take(quizNum)
+                    println("Random Quizzes with Indices: $randomQuizzesWithIndices")
+
+                    // 상태 업데이트 (퀴즈 데이터와 인덱스 포함)
+                    quizzes.value = randomQuizzesWithIndices.map { it.second }
+                    totalQuestions.value = randomQuizzesWithIndices.size
+
+                    // 랜덤으로 선택된 퀴즈의 인덱스 출력 (필요할 경우 상태로 보관 가능)
+                    val selectedIndices = randomQuizzesWithIndices.map { it.first }
+                    println("Selected Indices: $selectedIndices")
                 } else {
                     println("Document does not exist.")
                 }
