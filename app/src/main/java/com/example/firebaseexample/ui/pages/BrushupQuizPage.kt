@@ -40,7 +40,7 @@ fun BrushupQuizPage(
         }
 
         viewModel.fetchQuizzes(
-            source = QuizSource.CATEGORY,
+            source = QuizSource.BRUSHUP,
             categoryId = viewModel.brushUpCategory.value // brushUpCategory 사용
         )
 

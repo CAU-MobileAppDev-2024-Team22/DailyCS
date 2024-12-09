@@ -8,7 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-class QuizViewModel() : ViewModel() {
+class QuizViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
     private val repository = QuizRepository()
 
@@ -55,6 +55,7 @@ class QuizViewModel() : ViewModel() {
         when (source) {
             QuizSource.TODAY -> fetchTodayQuizzes()
             QuizSource.CATEGORY -> fetchCategoryQuizzes(categoryId ?: "")
+            QuizSource.BRUSHUP -> fetchRandomQuizzes(categoryId ?: "")
         }
     }
 
@@ -91,6 +92,30 @@ class QuizViewModel() : ViewModel() {
             }
     }
 
+    fun fetchRandomQuizzes(categoryId: String) {
+        println("Category ID for Random: $categoryId")
+        db.collection("quizzes").document(categoryId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // `problems` 배열 필드 가져오기
+                    val fetchedQuizzes = document.get("problems") as? List<Map<String, Any>> ?: emptyList()
+                    println("Fetched Quizzes for Random: $fetchedQuizzes")
+
+                    // 랜덤으로 5개 선택
+                    val randomQuizzes = fetchedQuizzes.shuffled().take(5)
+                    println("Random Quizzes: $randomQuizzes")
+
+                    // 상태 업데이트
+                    quizzes.value = randomQuizzes
+                    totalQuestions.value = randomQuizzes.size
+                } else {
+                    println("Document does not exist.")
+                }
+            }
+            .addOnFailureListener { exception ->
+                println("Error fetching quizzes: ${exception.message}")
+            }
+    }
 
     fun updateSolvedQuzzesNum(){
         solvedQuizzesNum.value++
@@ -121,5 +146,6 @@ class QuizViewModel() : ViewModel() {
 // 퀴즈 소스 타입 정의
 enum class QuizSource {
     TODAY,
-    CATEGORY
+    CATEGORY,
+    BRUSHUP
 }
