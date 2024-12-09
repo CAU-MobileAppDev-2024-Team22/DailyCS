@@ -1,9 +1,11 @@
 package com.example.firebaseexample.ui.pages
 
+import androidx.compose.foundation.background
 import com.example.firebaseexample.data.model.QuizViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -14,33 +16,33 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.firebaseexample.ui.components.CircularChart
 import com.example.firebaseexample.data.repository.QuizRepository
+import com.example.firebaseexample.ui.theme.ThemeBlue
+import com.example.firebaseexample.ui.theme.ThemeGray
+import com.example.firebaseexample.ui.theme.ThemeLightGray
 import com.example.firebaseexample.ui.theme.Typography
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizResultPage(
-    score: Int,                // 사용자 점수
-    totalQuestions: Int,       // 전체 문제 수
-    onRestartQuiz: () -> Unit, // 다시 퀴즈 풀기 버튼 콜백
-    onGoToMainPage: () -> Unit, // 메인 페이지로 이동 버튼 콜백
+    score: Int,
+    totalQuestions: Int,
+    onRestartQuiz: () -> Unit,
+    onGoToMainPage: () -> Unit,
     viewModel: QuizViewModel,
-    navController: NavController // NavController 추가
+    navController: NavController
 ) {
     val repository = QuizRepository()
     val currentUser = FirebaseAuth.getInstance().currentUser?.uid
 
-    // ViewModel에서 저장된 결과를 가져옴
     val savedResults by viewModel.savedResults.collectAsState()
-    val problemDetailsVisibility = remember { mutableStateMapOf<String, Boolean>() } // 문제 상세 보기 상태
-
-    // 저장된 결과를 로그에 출력
-    println("Saved Results: $savedResults")
+    val problemDetailsVisibility = remember { mutableStateMapOf<String, Boolean>() }
 
     Scaffold(
         topBar = {
@@ -77,32 +79,15 @@ fun QuizResultPage(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // 결과 표시
-//            Text(
-//                text = "퀴즈 완료!",
-//                style = MaterialTheme.typography.titleLarge
-//            )
-//            Text(
-//                text = "점수: $score / $totalQuestions",
-//                style = MaterialTheme.typography.titleMedium
-//            )
-                    // 차트
                     CircularChart(
                         progress = score.toFloat() / totalQuestions.toFloat(),
                         score = score,
                         totalQuestions = totalQuestions
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // 저장된 결과 출력
-                    Text(
-                        text = "저장된 결과:",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
-                    // 문제 결과 불러오는 영역
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(savedResults) { result ->
                             val quizId = result["quizId"] as? String ?: "Unknown"
@@ -113,10 +98,36 @@ fun QuizResultPage(
                             val problemDetailsFlow = viewModel.getProblemDetailsFlow(quizId)
                             val problemDetails by problemDetailsFlow.collectAsState()
 
-                            Column {
+                            val quizIdx = quizId.toInt() + 1
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                                    .background(ThemeGray)
+                            ) {
+                                HorizontalDivider(
+                                    color = ThemeLightGray,
+                                    thickness = 2.dp,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
+                            ) {
                                 Text(
-                                    text = "문제: $quizId - $status",
-                                    style = MaterialTheme.typography.bodyMedium
+                                    text = "Q$quizIdx.",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier
+                                        .background(
+                                            color = if (isCorrect) ThemeBlue else ThemeGray,
+                                            shape = RoundedCornerShape(20.dp)
+                                        )
+                                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    color = Color.White,
                                 )
                                 Button(onClick = {
                                     val isVisible = problemDetailsVisibility[quizId] ?: false
@@ -139,7 +150,7 @@ fun QuizResultPage(
                                             modifier = Modifier.padding(top = 8.dp)
                                         )
                                         Text(
-                                            text = "정답: ${problemDetails !!["answer"] ?: "정답 없음"}",
+                                            text = "정답: ${problemDetails!!["answer"] ?: "정답 없음"}",
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                         Text(
@@ -162,12 +173,10 @@ fun QuizResultPage(
                             }
                         }
                     }
-
-                    // 다시 퀴즈 풀기 버튼
                     Button(
                         onClick = {
                             viewModel.resetSavedResults()
-                            viewModel.resetProblemDetails() // 문제 상태 초기화
+                            viewModel.resetProblemDetails()
                             viewModel.resetQuizResults()
                             onRestartQuiz()
                         },
@@ -179,11 +188,10 @@ fun QuizResultPage(
                         )
                     }
 
-                    // 메인 페이지로 이동 버튼
                     Button(
                         onClick = {
                             viewModel.resetSavedResults()
-                            viewModel.resetProblemDetails() // 문제 상태 초기화
+                            viewModel.resetProblemDetails()
                             viewModel.resetQuizResults()
                             onGoToMainPage()
                         },
@@ -199,5 +207,4 @@ fun QuizResultPage(
         }
     )
     viewModel.resetQuizState()
-
 }
