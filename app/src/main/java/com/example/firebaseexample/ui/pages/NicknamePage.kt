@@ -62,11 +62,11 @@ fun NicknamePage(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "닉네임 설정",
-                        style = Typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                    )
+//                    Text(
+//                        text = "닉네임 설정",
+//                        style = Typography.titleMedium,
+//                        textAlign = TextAlign.Center,
+//                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { backToMainPage() }) {
@@ -147,18 +147,18 @@ fun NicknamePage(
                     style = Typography.bodyMedium
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            TextButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { backToMainPage() }
-            ) {
-                Text(
-                    text = "로그인 페이지로 돌아가기",
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    color = ThemeGray,
-                    style = Typography.bodyMedium,
-                )
-            }
+//            Spacer(modifier = Modifier.height(16.dp))
+//            TextButton(
+//                modifier = Modifier.fillMaxWidth(),
+//                onClick = { backToMainPage() }
+//            ) {
+//                Text(
+//                    text = "로그인 페이지로 돌아가기",
+//                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+//                    color = ThemeGray,
+//                    style = Typography.bodyMedium,
+//                )
+//            }
         }
     }
 }
